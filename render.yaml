@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: visa-tracking-system
+    env: python
+    buildCommand: |
+      export PYTHON_VERSION=3.11.0
+      curl -sSL https://www.python.org/ftp/python/3.11.0/Python-3.11.0.tgz | tar xz
+      cd Python-3.11.0
+      ./configure --prefix=/opt/python3.11
+      make && make install
+      export PATH=/opt/python3.11/bin:$PATH
+      python3.11 -m pip install --upgrade pip
+      python3.11 -m pip install -r requirements.txt
+    startCommand: bash render_start.sh
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FLASK_ENV
+        value: production
+      - key: PATH
+        value: /opt/python3.11/bin:$PATH
