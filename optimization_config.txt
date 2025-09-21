@@ -1,0 +1,15 @@
+# Configuration optimisée pour VISA PRO2
+# Optimisations appliquées:
+# - Index de base de données avancés
+# - Templates HTML optimisés
+# - Fichiers CSS minifiés
+# - Fichiers JavaScript minifiés
+# - Pagination optimisée (50 clients par page)
+# - Cache activé pour les statistiques
+
+# Paramètres de performance
+PAGINATION_SIZE = 50
+CACHE_TTL = 300
+MAX_CLIENTS_PER_PAGE = 50
+ENABLE_CACHE = true
+OPTIMIZE_QUERIES = true

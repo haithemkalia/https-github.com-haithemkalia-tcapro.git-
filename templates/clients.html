@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+{% block title %}إدارة العملاء - {{ app_title }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+ <div class="row mb-4">
+ <div class="col-12">
+  <div class="card card-modern">
+  <div class="card-header-modern">
+   <div class="row align-items-center">
+   <div class="col">
+    <h2 class="mb-0">
+    <i class="fas fa-users me-2"></i> إدارة العملاء
+    </h2>
+    <p class="mb-0 mt-2 opacity-75">عرض وإدارة جميع عملاء النظام</p>
+   </div>
+   <div class="col-auto">
+    <a href="{{ url_for('add_client') }}" class="btn btn-success-custom">
+    <i class="fas fa-plus me-2"></i>إضافة عميل جديد
+    </a>
+   </div>
+   </div>
+  </div>
+  </div>
+ </div>
+ </div>
+
+ <div class="row mb-4">
+ <div class="col-12">
+  <div class="card card-modern">
+  <div class="card-body">
+   <form method="GET" action="{{ url_for('clients_list') }}" class="row g-3">
+   <div class="col-lg-4 col-md-6">
+    <label for="search" class="form-label">
+    <i class="fas fa-search me-1"></i>البحث الفوري
+    </label>
+    <input type="text" class="form-control" id="search" name="search" 
+      value="{{ search_term }}" placeholder="البحث بالاسم أو رقم الهاتف...">
+   </div>
+   
+   <div class="col-lg-2 col-md-6">
+    <label for="status" class="form-label">حالة التأشيرة</label>
+    <select class="form-select" id="status" name="status">
+    <option value="">جميع الحالات</option>
+    {% for status in visa_statuses %}
+    <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>
+     {{ status }}
+    </option>
+    {% endfor %}
+    </select>
+   </div>
+   
+   <div class="col-lg-2 col-md-6">
+    <label for="nationality" class="form-label">الجنسية</label>
+    <select class="form-select" id="nationality" name="nationality">
+    <option value="">جميع الجنسيات</option>
+    {% for nationality in nationalities %}
+    <option value="{{ nationality }}" {% if nationality_filter == nationality %}selected{% endif %}>
+     {{ nationality }}
+    </option>
+    {% endfor %}
+    </select>
+   </div>
+   
+   <div class="col-lg-2 col-md-6">
+    <label for="employee" class="form-label">الموظف المسؤول</label>
+    <select class="form-select" id="employee" name="employee">
+    <option value="">جميع الموظفين</option>
+    {% for employee in employees %}
+    <option value="{{ employee }}" {% if employee_filter == employee %}selected{% endif %}>
+     {{ employee }}
+    </option>
+    {% endfor %}
+    </select>
+   </div>
+   
+   <div class="col-lg-2 col-md-6 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary-custom w-100">
+    <i class="fas fa-search me-1"></i>بحث
+    </button>
+   </div>
+   
+   <div class="col-lg-2 col-md-6 d-flex align-items-end">
+    <a href="{{ url_for('clients_list', per_page='all') }}" class="btn btn-info-custom w-100">
+    <i class="fas fa-list me-1"></i>عرض الكل
+    </a>
+   </div>
+   </form>
+  </div>
+  </div>
+ </div>
+ </div>
+
+ <div class="row">
+ <div class="col-12">
+  <div class="card card-modern">
+  <div class="card-body">
+   {% if clients and clients|length > 0 %}
+   <div class="table-responsive">
+    <table class="table table-hover">
+    <thead class="table-dark">
+     <tr>
+     <th>معرف العميل</th>
+     <th>الاسم الكامل</th>
+     <th>رقم الواتساب</th>
+     <th>تاريخ التقديم</th>
+     <th>تاريخ استلام للسفارة</th>
+     <th>رقم جواز السفر</th>
+     <th>حالة جواز السفر</th>
+     <th>الجنسية</th>
+     <th>حالة تتبع التأشيرة</th>
+     <th>اختيار الموظف مسؤول</th>
+     <th>من طرف</th>
+     <th>الخلاصة</th>
+     <th>ملاحظة</th>
+     <th>الإجراءات</th>
+     </tr>
+    </thead>
+    <tbody>
+     {% for client in clients %}
+     <tr>
+     <td>{{ client.get('client_id', 'غير محدد') }}</td>
+     <td>{{ client.get('full_name', 'غير محدد') }}</td>
+     <td>{{ client.get('whatsapp_number', 'غير محدد') }}</td>
+     <td>
+      <div class="inline-edit-container" data-field="application_date" data-client-id="{{ client.get('client_id') }}">
+      <div class="inline-edit-display">
+       <span class="field-value">{{ client.get('application_date', 'غير محدد') }}</span>
+       <i class="fas fa-edit edit-icon"></i>
+      </div>
+      <input type="date" class="inline-edit-input form-control" style="display: none;" 
+        value="{{ client.get('application_date', '') }}">
+      </div>
+     </td>
+     <td>
+      <div class="inline-edit-container" data-field="transaction_date" data-client-id="{{ client.get('client_id') }}">
+      <div class="inline-edit-display">
+       <span class="field-value">{{ client.get('transaction_date', 'غير محدد') }}</span>
+       <i class="fas fa-edit edit-icon"></i>
+      </div>
+      <input type="date" class="inline-edit-input form-control" style="display: none;" 
+        value="{{ client.get('transaction_date', '') }}">
+      </div>
+     </td>
+     <td>{{ client.get('passport_number', 'غير محدد') }}</td>
+     <td>{{ client.get('passport_status', 'غير محدد') }}</td>
+     <td>{{ client.get('nationality', 'غير محدد') }}</td>
+     <td>
+      <div class="inline-edit-container" data-field="visa_status" data-client-id="{{ client.get('client_id') }}">
+      <div class="inline-edit-display">
+       <span class="field-value">{{ client.get('visa_status', 'غير محدد') }}</span>
+       <i class="fas fa-edit edit-icon"></i>
+      </div>
+      <select class="inline-edit-input form-control" style="display: none;">
+       <option value="">اختر الحالة</option>
+       {% for status in visa_statuses %}
+       <option value="{{ status }}" {% if client.get('visa_status') == status %}selected{% endif %}>
+       {{ status }}
+       </option>
+       {% endfor %}
+      </select>
+      </div>
+     </td>
+     <td>
+      <div class="inline-edit-container" data-field="responsible_employee" data-client-id="{{ client.get('client_id') }}">
+      <div class="inline-edit-display">
+       <span class="field-value">{{ client.get('responsible_employee', 'غير محدد') }}</span>
+       <i class="fas fa-edit edit-icon"></i>
+      </div>
+      <select class="inline-edit-input form-control" style="display: none;">
+       <option value="">اختر الموظف</option>
+       {% for employee in employees %}
+       <option value="{{ employee }}" {% if client.get('responsible_employee') == employee %}selected{% endif %}>
+       {{ employee }}
+       </option>
+       {% endfor %}
+      </select>
+      </div>
+     </td>
+     <td>{{ client.get('processed_by', 'غير محدد') }}</td>
+     <td>{{ client.get('summary', 'غير محدد') }}</td>
+     <td>{{ client.get('notes', 'غير محدد') }}</td>
+     <td>
+      <div class="btn-group" role="group">
+      <a href="{{ url_for('edit_client', client_id=client.get('client_id')) }}" 
+        class="btn btn-sm btn-outline-primary" title="تعديل">
+       <i class="fas fa-edit"></i>
+      </a>
+      <button type="button" class="btn btn-sm btn-outline-success" 
+       onclick="sendWhatsAppTest('{{ client.get('client_id') }}')" 
+       title="إرسال رسالة واتساب">
+       <i class="fab fa-whatsapp"></i>
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-danger" 
+       onclick="deleteClient('{{ client.get('client_id') }}')" 
+       title="حذف العميل - انقر للتأكيد"
+       style="transition: all 0.3s ease;">
+       <i class="fas fa-trash"></i> حذف
+      </button>
+      </div>
+     </td>
+     </tr>
+     {% endfor %}
+    </tbody>
+    </table>
+   </div>
+   {% else %}
+   <div class="text-center py-5">
+    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+    <h4 class="text-muted">لا توجد نتائج</h4>
+    <p class="text-muted">لم يتم العثور على أي عملاء مطابقين للمعايير المحددة</p>
+   </div>
+   {% endif %}
+  </div>
+  </div>
+  </div>
+ </div>
+</div>
+
+<!-- Pagination -->
+{% if pagination and pagination.total_pages > 1 %}
+<div class="row mt-4">
+ <div class="col-12">
+  <div class="card card-modern">
+   <div class="card-body">
+    <div class="row align-items-center">
+     <div class="col-md-6">
+      <p class="mb-0 text-muted">
+       عرض {{ (pagination.page - 1) * pagination.per_page + 1 }} إلى 
+       {{ pagination.page * pagination.per_page if pagination.page * pagination.per_page <= pagination.total else pagination.total }} 
+       من أصل {{ pagination.total }} عميل
+      </p>
+     </div>
+     <div class="col-md-6">
+      <nav aria-label="Pagination">
+       <ul class="pagination justify-content-end mb-0">
+        <!-- Page précédente -->
+        {% if pagination.has_prev %}
+        <li class="page-item">
+         <a class="page-link" href="{{ url_for('clients_list', page=pagination.prev_num, per_page=pagination.per_page, search=search_term, status=status_filter, nationality=nationality_filter, employee=employee_filter) }}">
+          <i class="fas fa-chevron-right"></i> السابق
+         </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+         <span class="page-link">
+          <i class="fas fa-chevron-right"></i> السابق
+         </span>
+        </li>
+        {% endif %}
+        
+        <!-- Pages numérotées -->
+        {% set start_page = [1, pagination.page - 2]|max %}
+        {% set end_page = [pagination.total_pages, pagination.page + 2]|min %}
+        
+        {% if start_page > 1 %}
+        <li class="page-item">
+         <a class="page-link" href="{{ url_for('clients_list', page=1, per_page=pagination.per_page, search=search_term, status=status_filter, nationality=nationality_filter, employee=employee_filter) }}">1</a>
+        </li>
+        {% if start_page > 2 %}
+        <li class="page-item disabled">
+         <span class="page-link">...</span>
+        </li>
+        {% endif %}
+        {% endif %}
+        
+        {% for page_num in range(start_page, end_page + 1) %}
+        <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+         <a class="page-link" href="{{ url_for('clients_list', page=page_num, per_page=pagination.per_page, search=search_term, status=status_filter, nationality=nationality_filter, employee=employee_filter) }}">{{ page_num }}</a>
+        </li>
+        {% endfor %}
+        
+        {% if end_page < pagination.total_pages %}
+        {% if end_page < pagination.total_pages - 1 %}
+        <li class="page-item disabled">
+         <span class="page-link">...</span>
+        </li>
+        {% endif %}
+        <li class="page-item">
+         <a class="page-link" href="{{ url_for('clients_list', page=pagination.total_pages, per_page=pagination.per_page, search=search_term, status=status_filter, nationality=nationality_filter, employee=employee_filter) }}">{{ pagination.total_pages }}</a>
+        </li>
+        {% endif %}
+        
+        <!-- Page suivante -->
+        {% if pagination.has_next %}
+        <li class="page-item">
+         <a class="page-link" href="{{ url_for('clients_list', page=pagination.next_num, per_page=pagination.per_page, search=search_term, status=status_filter, nationality=nationality_filter, employee=employee_filter) }}">
+          التالي <i class="fas fa-chevron-left"></i>
+         </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+         <span class="page-link">
+          التالي <i class="fas fa-chevron-left"></i>
+         </span>
+        </li>
+        {% endif %}
+       </ul>
+      </nav>
+     </div>
+    </div>
+    
+    <!-- Options de pagination -->
+    <div class="row mt-3">
+     <div class="col-12">
+      <div class="btn-group" role="group">
+       <a href="{{ url_for('clients_list', per_page=25, search=search_term, status=status_filter, nationality=nationality_filter, employee=employee_filter) }}" 
+          class="btn btn-sm {% if pagination.per_page == 25 %}btn-primary{% else %}btn-outline-primary{% endif %}">25</a>
+       <a href="{{ url_for('clients_list', per_page=50, search=search_term, status=status_filter, nationality=nationality_filter, employee=employee_filter) }}" 
+          class="btn btn-sm {% if pagination.per_page == 50 %}btn-primary{% else %}btn-outline-primary{% endif %}">50</a>
+       <a href="{{ url_for('clients_list', per_page=100, search=search_term, status=status_filter, nationality=nationality_filter, employee=employee_filter) }}" 
+          class="btn btn-sm {% if pagination.per_page == 100 %}btn-primary{% else %}btn-outline-primary{% endif %}">100</a>
+       <a href="{{ url_for('clients_list', per_page='all', search=search_term, status=status_filter, nationality=nationality_filter, employee=employee_filter) }}" 
+          class="btn btn-sm {% if pagination.per_page >= 10000 %}btn-success{% else %}btn-outline-success{% endif %}">
+        <i class="fas fa-list"></i> عرض الكل
+       </a>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+{% endif %}
+
+<script>
+// JavaScript pour l'édition en ligne
+document.addEventListener('DOMContentLoaded', function() {
+ initializeInlineEditing();
+});
+
+function initializeInlineEditing() {
+ const containers = document.querySelectorAll('.inline-edit-container');
+ containers.forEach(container => {
+ const display = container.querySelector('.inline-edit-display');
+ const input = container.querySelector('.inline-edit-input');
+ const editIcon = container.querySelector('.edit-icon');
+ 
+ if (display && input && editIcon) {
+  display.addEventListener('click', function(e) {
+  e.stopPropagation();
+  activateInlineEdit(container);
+  });
+  
+  editIcon.addEventListener('click', function(e) {
+  e.stopPropagation();
+  activateInlineEdit(container);
+  });
+  
+  if (input.tagName === 'SELECT') {
+  input.addEventListener('change', function() {
+   saveInlineEdit(container);
+  });
+  } else if (input.tagName === 'INPUT') {
+  input.addEventListener('blur', function() {
+   saveInlineEdit(container);
+  });
+  input.addEventListener('keydown', function(e) {
+   if (e.key === 'Enter') {
+   saveInlineEdit(container);
+   } else if (e.key === 'Escape') {
+   cancelInlineEdit(container);
+   }
+  });
+  }
+ }
+ });
+}
+
+function activateInlineEdit(container) {
+ const display = container.querySelector('.inline-edit-display');
+ const input = container.querySelector('.inline-edit-input');
+ 
+ if (display && input) {
+ display.style.display = 'none';
+ input.style.display = 'block';
+ input.focus();
+ }
+}
+
+function saveInlineEdit(container) {
+ const field = container.dataset.field;
+ const clientId = container.dataset.clientId;
+ const input = container.querySelector('.inline-edit-input');
+ const value = input.value;
+ 
+ if (!value) {
+ cancelInlineEdit(container);
+ return;
+ }
+ 
+ // Afficher le loading
+ showInlineEditLoading(container);
+ 
+ // Envoyer la requête
+ fetch(`/api/client/${clientId}/update-field`, {
+ method: 'POST',
+ headers: {
+  'Content-Type': 'application/json',
+ },
+ body: JSON.stringify({
+  field: field,
+  value: value
+ })
+ })
+ .then(response => response.json())
+ .then(data => {
+ if (data.success) {
+  updateInlineEditDisplay(container, value);
+  showInlineEditMessage(container, 'تم الحفظ بنجاح', 'success');
+ } else {
+  showInlineEditMessage(container, 'خطأ في الحفظ: ' + data.message, 'error');
+  cancelInlineEdit(container);
+ }
+ })
+ .catch(error => {
+ showInlineEditMessage(container, 'خطأ في الاتصال: ' + error.message, 'error');
+ cancelInlineEdit(container);
+ });
+}
+
+function cancelInlineEdit(container) {
+ const display = container.querySelector('.inline-edit-display');
+ const input = container.querySelector('.inline-edit-input');
+ 
+ if (display && input) {
+ display.style.display = 'block';
+ input.style.display = 'none';
+ }
+}
+
+function updateInlineEditDisplay(container, value) {
+ const fieldValue = container.querySelector('.field-value');
+ if (fieldValue) {
+ fieldValue.textContent = value;
+ }
+}
+
+function showInlineEditLoading(container) {
+ const display = container.querySelector('.inline-edit-display');
+ if (display) {
+ display.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+ }
+}
+
+function showInlineEditMessage(container, message, type) {
+ const display = container.querySelector('.inline-edit-display');
+ if (display) {
+ const className = type === 'success' ? 'text-success' : 'text-danger';
+ display.innerHTML = `<span class="${className}">${message}</span>`;
+ 
+ setTimeout(() => {
+  const fieldValue = container.querySelector('.field-value');
+  if (fieldValue) {
+  display.innerHTML = fieldValue.outerHTML + '<i class="fas fa-edit edit-icon"></i>';
+  }
+ }, 2000);
+ }
+}
+
+// Fonction pour supprimer un client avec confirmation avancée
+function deleteClient(clientId) {
+ // Récupérer les informations du client pour la confirmation
+ const row = event.target.closest('tr');
+ const clientName = row.querySelector('td:nth-child(2)').textContent.trim();
+ const clientPhone = row.querySelector('td:nth-child(3)').textContent.trim();
+ 
+ // Message de confirmation détaillé
+ const confirmMessage = `هل أنت متأكد من حذف هذا العميل؟
+
+📋 معلومات العميل:
+• المعرف: ${clientId}
+• الاسم: ${clientName}
+• الهاتف: ${clientPhone}
+
+⚠️ تحذير: هذا الإجراء لا يمكن التراجع عنه!
+
+اكتب "حذف" للتأكيد:`;
+ 
+ // Demander confirmation avec input
+ const userInput = prompt(confirmMessage);
+ 
+ if (userInput !== 'حذف') {
+  if (userInput !== null) {
+   alert('❌ تم إلغاء الحذف - لم تكتب "حذف"');
+  }
+  return;
+ }
+ 
+ // Afficher le loading
+ const button = event.target.closest('button');
+ const originalContent = button.innerHTML;
+ button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> حذف...';
+ button.disabled = true;
+ 
+ // Créer un formulaire pour la suppression
+ const form = document.createElement('form');
+ form.method = 'POST';
+ form.action = `/client/delete/${clientId}`;
+ 
+ // Ajouter le formulaire au DOM et le soumettre
+ document.body.appendChild(form);
+ form.submit();
+}
+
+// Fonction pour envoyer un message WhatsApp de test
+function sendWhatsAppTest(clientId) {
+ if (!confirm('هل تريد إرسال رسالة واتساب تجريبية لهذا العميل؟')) {
+ return;
+ }
+ 
+ // Afficher le loading
+ const button = event.target.closest('button');
+ const originalContent = button.innerHTML;
+ button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+ button.disabled = true;
+ 
+ // Envoyer la requête
+ fetch(`/api/client/${clientId}/send-whatsapp`, {
+ method: 'POST',
+ headers: {
+  'Content-Type': 'application/json',
+ }
+ })
+ .then(response => response.json())
+ .then(data => {
+ if (data.success) {
+  alert('✅ تم إرسال رسالة الواتساب بنجاح!\n\n📱 الرقم: ' + data.phone_number + '\n📋 الحالة: ' + data.status);
+ } else {
+  alert('❌ فشل في إرسال الرسالة: ' + data.message);
+ }
+ })
+ .catch(error => {
+ alert('❌ خطأ في الاتصال: ' + error.message);
+ })
+ .finally(() => {
+ // Restaurer le bouton
+ button.innerHTML = originalContent;
+ button.disabled = false;
+ });
+}
+</script>
+{% endblock %}
