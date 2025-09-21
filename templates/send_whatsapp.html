@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}إرسال رسالة واتساب - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-modern">
+                <div class="card-header-modern">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2 class="mb-0">
+                                <i class="fab fa-whatsapp me-2 text-success"></i>
+                                إرسال رسالة واتساب
+                            </h2>
+                            <p class="mb-0 mt-2 opacity-75">إرسال رسالة مخصصة للعميل عبر واتساب</p>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{{ url_for('clients_list') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-right me-2"></i>العودة للقائمة
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Client Information -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-modern">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>
+                        معلومات العميل
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>معرف العميل:</strong>
+                            <p class="text-primary">{{ client.client_id }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>الاسم الكامل:</strong>
+                            <p>{{ client.client_name }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>حالة التأشيرة:</strong>
+                            <p><span class="badge bg-info">{{ client.visa_status }}</span></p>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>رقم الواتساب:</strong>
+                            <p>
+                                {% if client.phone_number %}
+                                    <i class="fab fa-whatsapp text-success me-1"></i>{{ client.phone_number }}
+                                {% else %}
+                                    <span class="text-muted">غير محدد</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- WhatsApp Message -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-modern">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comment-dots me-2"></i>
+                        الرسالة المخصصة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>معاينة الرسالة:</strong> هذه هي الرسالة التي سيتم إرسالها للعميل
+                    </div>
+                    
+                    <div class="message-preview p-4 bg-light rounded border">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <i class="fab fa-whatsapp fa-2x text-success"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="bg-white p-3 rounded shadow-sm" style="max-width: 400px;">
+                                    <p class="mb-0" style="line-height: 1.6; direction: rtl; text-align: right;">
+                                        {{ message }}
+                                    </p>
+                                </div>
+                                <small class="text-muted mt-2 d-block">
+                                    <i class="fas fa-clock me-1"></i>
+                                    الآن
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-modern">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-center gap-3">
+                        {% if client.phone_number %}
+                        <a href="{{ whatsapp_url }}" target="_blank" class="btn btn-success btn-lg">
+                            <i class="fab fa-whatsapp me-2"></i>
+                            إرسال عبر واتساب
+                        </a>
+                        {% else %}
+                        <a href="{{ whatsapp_url }}" target="_blank" class="btn btn-success btn-lg">
+                            <i class="fab fa-whatsapp me-2"></i>
+                            فتح واتساب ويب
+                        </a>
+                        {% endif %}
+                        
+                        <button class="btn btn-outline-primary btn-lg" onclick="copyMessage()">
+                            <i class="fas fa-copy me-2"></i>
+                            نسخ الرسالة
+                        </button>
+                        
+                        <a href="{{ url_for('clients_list') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-times me-2"></i>
+                            إلغاء
+                        </a>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>ملاحظة:</strong> 
+                            {% if client.phone_number %}
+                                سيتم فتح واتساب مباشرة مع رقم العميل والرسالة جاهزة للإرسال
+                            {% else %}
+                                لم يتم تحديد رقم واتساب للعميل، سيتم فتح واتساب ويب مع الرسالة جاهزة
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden textarea for copying -->
+<textarea id="messageText" style="position: absolute; left: -9999px;">{{ message }}</textarea>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Copy message to clipboard
+function copyMessage() {
+    const messageText = document.getElementById('messageText');
+    messageText.select();
+    messageText.setSelectionRange(0, 99999); // For mobile devices
+    
+    try {
+        document.execCommand('copy');
+        
+        // Show success feedback
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>تم النسخ!';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-primary');
+        }, 2000);
+        
+    } catch (err) {
+        alert('فشل في نسخ الرسالة. يرجى النسخ يدوياً.');
+    }
+}
+
+// Auto-focus and highlight message for easy copying
+document.addEventListener('DOMContentLoaded', function() {
+    // Add some animation to the message preview
+    const messagePreview = document.querySelector('.message-preview');
+    if (messagePreview) {
+        messagePreview.style.opacity = '0';
+        messagePreview.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            messagePreview.style.transition = 'all 0.5s ease';
+            messagePreview.style.opacity = '1';
+            messagePreview.style.transform = 'translateY(0)';
+        }, 100);
+    }
+});
+</script>
+{% endblock %}

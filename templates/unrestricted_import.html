@@ -1,0 +1,724 @@
+{% extends "base.html" %}
+
+{% block title %}الاستيراد الشامل بدون قيود - {{ super() }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.import-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px 0;
+}
+
+.import-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin: 20px auto;
+    max-width: 1200px;
+}
+
+.import-header {
+    background: linear-gradient(135deg, #1f538d 0%, #14a085 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.import-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.import-header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.upload-zone {
+    border: 3px dashed #1f538d;
+    border-radius: 15px;
+    padding: 60px 20px;
+    text-align: center;
+    background: #f8f9ff;
+    margin: 30px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-zone:hover {
+    border-color: #14a085;
+    background: #f0f8ff;
+    transform: translateY(-2px);
+}
+
+.upload-zone.dragover {
+    border-color: #28a745;
+    background: #e8f5e8;
+}
+
+.upload-icon {
+    font-size: 4rem;
+    color: #1f538d;
+    margin-bottom: 20px;
+}
+
+.upload-text {
+    font-size: 1.3rem;
+    color: #1f538d;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.upload-subtext {
+    color: #666;
+    font-size: 1rem;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 30px;
+}
+
+.feature-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.feature-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.feature-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #1f538d;
+}
+
+.feature-desc {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.progress-container {
+    display: none;
+    padding: 30px;
+    text-align: center;
+}
+
+.progress-circle {
+    width: 120px;
+    height: 120px;
+    border: 8px solid #e9ecef;
+    border-top: 8px solid #1f538d;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.progress-text {
+    font-size: 1.3rem;
+    color: #1f538d;
+    font-weight: bold;
+}
+
+.results-container {
+    display: none;
+    padding: 30px;
+}
+
+.results-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1f538d;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.report-section {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.report-header {
+    background: #1f538d;
+    color: white;
+    padding: 15px 20px;
+    font-weight: bold;
+}
+
+.report-content {
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.btn-import {
+    background: linear-gradient(135deg, #1f538d 0%, #14a085 100%);
+    border: none;
+    color: white;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 20px;
+}
+
+.btn-import:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(31, 83, 141, 0.3);
+}
+
+.btn-import:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 30px;
+}
+
+.alert-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.alert-error {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.file-info {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 20px 30px;
+    display: none;
+}
+
+.file-name {
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 5px;
+}
+
+.file-size {
+    color: #666;
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="import-container">
+    <div class="import-card">
+        <!-- Header -->
+        <div class="import-header">
+            <h1>🔍 تحليل وإستيراد شامل بدون قيود</h1>
+            <p>نظام متقدم لتحليل واستيراد ملفات Excel بدقة عالية وأداء فائق</p>
+        </div>
+
+        <!-- Upload Zone -->
+        <div id="uploadSection">
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">اسحب وأفلت ملف Excel هنا</div>
+                <div class="upload-subtext">أو انقر لاختيار الملف (.xlsx, .xls)</div>
+                <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
+            </div>
+            
+            <div class="file-info" id="fileInfo">
+                <div class="file-name" id="fileName"></div>
+                <div class="file-size" id="fileSize"></div>
+            </div>
+
+            <div class="text-center">
+                <button class="btn-import" id="importBtn" disabled>
+                    <i class="fas fa-rocket"></i> بدء التحليل والاستيراد الشامل
+                </button>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon text-success">
+                    <i class="fas fa-unlock"></i>
+                </div>
+                <div class="feature-title">بدون قيود أو تحققات</div>
+                <div class="feature-desc">استيراد جميع البيانات كما هي دون أي قيود أو تحققات من الصحة</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon text-info">
+                    <i class="fas fa-copy"></i>
+                </div>
+                <div class="feature-title">قبول التكرارات</div>
+                <div class="feature-desc">استيراد جميع التكرارات والبيانات المكررة دون استثناء</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon text-warning">
+                    <i class="fas fa-magic"></i>
+                </div>
+                <div class="feature-title">توليد تلقائي للمعرفات</div>
+                <div class="feature-desc">إنشاء معرفات تلقائية للعملاء الذين لا يملكون معرف</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon text-primary">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="feature-title">تحليل متقدم</div>
+                <div class="feature-desc">تحليل شامل لجميع البيانات مع تقرير مفصل عن الجودة والإحصائيات</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon text-danger">
+                    <i class="fas fa-user-slash"></i>
+                </div>
+                <div class="feature-title">قبول الأسماء الفارغة</div>
+                <div class="feature-desc">قبول العملاء الذين لا يملكون أسماء مع إنشاء أسماء افتراضية</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon text-secondary">
+                    <i class="fas fa-language"></i>
+                </div>
+                <div class="feature-title">دعم متعدد اللغات</div>
+                <div class="feature-desc">دعم كامل للنصوص العربية والإنجليزية والرموز الخاصة</div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-container" id="progressSection">
+            <div class="progress-circle"></div>
+            <div class="progress-text" id="progressText">جاري التحليل والاستيراد...</div>
+            <div class="mt-3">
+                <small class="text-muted">يرجى الانتظار، قد تستغرق العملية بضع دقائق حسب حجم الملف</small>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-container" id="resultsSection">
+            <div class="results-header">
+                <h3><i class="fas fa-check-circle"></i> تم الاستيراد بنجاح!</h3>
+                <p id="successMessage">تم تحليل واستيراد البيانات بنجاح</p>
+            </div>
+
+            <div class="stats-grid" id="statsGrid">
+                <!-- Stats will be populated by JavaScript -->
+            </div>
+
+            <div class="report-section">
+                <div class="report-header">
+                    <i class="fas fa-chart-bar"></i> تقرير التحليل المفصل
+                </div>
+                <div class="report-content" id="analysisReport">
+                    <!-- Analysis report will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="report-section">
+                <div class="report-header">
+                    <i class="fas fa-list-alt"></i> تقرير الاستيراد النهائي
+                </div>
+                <div class="report-content" id="finalReport">
+                    <!-- Final report will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button class="btn btn-primary btn-lg" onclick="location.href='/clients'">
+                    <i class="fas fa-users"></i> عرض قائمة العملاء
+                </button>
+                <button class="btn btn-secondary btn-lg ms-3" onclick="location.reload()">
+                    <i class="fas fa-redo"></i> استيراد ملف آخر
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    const uploadZone = $('#uploadZone');
+    const fileInput = $('#fileInput');
+    const fileInfo = $('#fileInfo');
+    const fileName = $('#fileName');
+    const fileSize = $('#fileSize');
+    const importBtn = $('#importBtn');
+    const uploadSection = $('#uploadSection');
+    const progressSection = $('#progressSection');
+    const resultsSection = $('#resultsSection');
+    const progressText = $('#progressText');
+    
+    let selectedFile = null;
+
+    let fileClickInProgress = false;
+    // Upload zone click handler
+    uploadZone.on('click', function() {
+        if (!fileClickInProgress) {
+            fileClickInProgress = true;
+            fileInput[0].click();
+            setTimeout(() => { fileClickInProgress = false; }, 100);
+        }
+    });
+
+    // File input change handler
+    fileInput.on('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            handleFileSelection(file);
+        }
+    });
+
+    // Drag and drop handlers
+    let dragInProgress = false;
+    
+    uploadZone.on('dragover', function(e) {
+        e.preventDefault();
+        if (!dragInProgress) {
+            dragInProgress = true;
+            $(this).addClass('dragover');
+        }
+    });
+
+    uploadZone.on('dragleave', function(e) {
+        e.preventDefault();
+        if (dragInProgress) {
+            dragInProgress = false;
+            $(this).removeClass('dragover');
+        }
+    });
+
+    uploadZone.on('drop', function(e) {
+        e.preventDefault();
+        dragInProgress = false;
+        $(this).removeClass('dragover');
+        
+        const files = e.originalEvent.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
+                handleFileSelection(file);
+            } else {
+                showAlert('يرجى اختيار ملف Excel صحيح (.xlsx أو .xls)', 'error');
+            }
+        }
+    });
+
+    // Import button click handler
+    let importInProgress = false;
+    
+    importBtn.on('click', function() {
+        if (selectedFile && !importInProgress) {
+            importInProgress = true;
+            performImport();
+            // Reset after 5 seconds to prevent double-clicks but allow retry
+            setTimeout(() => { importInProgress = false; }, 5000);
+        }
+    });
+
+    function handleFileSelection(file) {
+        selectedFile = file;
+        
+        // Show file info
+        fileName.text(file.name);
+        fileSize.text(formatFileSize(file.size));
+        fileInfo.show();
+        
+        // Enable import button
+        importBtn.prop('disabled', false);
+        
+        // Update upload zone
+        uploadZone.find('.upload-text').text('ملف محدد: ' + file.name);
+        uploadZone.find('.upload-subtext').text('انقر على "بدء التحليل والاستيراد" للمتابعة');
+    }
+
+    function performImport() {
+        if (!selectedFile) return;
+        
+        // Show progress section
+        uploadSection.hide();
+        progressSection.show();
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('excel_file', selectedFile);
+        
+        // Update progress text
+        let progressMessages = [
+            'جاري تحليل بنية الملف...',
+            'جاري فحص البيانات...',
+            'جاري معالجة الصفوف...',
+            'جاري إنشاء المعرفات التلقائية...',
+            'جاري حفظ البيانات...',
+            'جاري إنشاء التقارير...'
+        ];
+        
+        let messageIndex = 0;
+        let progressInterval;
+        let intervalCounter = 0;
+        const maxIntervals = 150; // Maximum 5 minutes (150 * 2 secondes)
+        
+        function updateProgress() {
+            if (messageIndex < progressMessages.length && intervalCounter < maxIntervals) {
+                progressText.text(progressMessages[messageIndex]);
+                messageIndex = (messageIndex + 1) % progressMessages.length; // Boucler sur les messages
+                intervalCounter++;
+            } else if (intervalCounter >= maxIntervals) {
+                // Arrêter si on dépasse le maximum
+                clearInterval(progressInterval);
+            }
+        }
+        
+        // Démarrer l'intervalle
+        progressInterval = setInterval(updateProgress, 2000);
+        
+        // Perform AJAX request
+        $.ajax({
+            url: '/api/unrestricted-import',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            timeout: 300000, // 5 minutes timeout
+            success: function(response) {
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                }
+                
+                if (response.success) {
+                    showResults(response);
+                } else {
+                    showError(response.error || 'حدث خطأ غير محدد');
+                }
+            },
+            error: function(xhr, status, error) {
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                }
+                
+                let errorMessage = 'حدث خطأ في الاتصال';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                } else if (status === 'timeout') {
+                    errorMessage = 'انتهت مهلة الاتصال - الملف كبير جداً';
+                }
+                
+                showError(errorMessage);
+            }
+        });
+    }
+
+    function showResults(response) {
+        progressSection.hide();
+        resultsSection.show();
+        
+        // Update success message
+        $('#successMessage').text(response.message);
+        
+        // Populate stats
+        const stats = response.import_stats;
+        const statsHtml = `
+            <div class="stat-card">
+                <div class="stat-number">${stats.total_processed.toLocaleString()}</div>
+                <div class="stat-label">إجمالي الصفوف</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${stats.successfully_imported.toLocaleString()}</div>
+                <div class="stat-label">تم الاستيراد</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${stats.duplicates_imported.toLocaleString()}</div>
+                <div class="stat-label">التكرارات</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${stats.empty_ids_generated.toLocaleString()}</div>
+                <div class="stat-label">معرفات مولدة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${stats.empty_names_accepted.toLocaleString()}</div>
+                <div class="stat-label">أسماء فارغة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${stats.processing_time.toFixed(2)}s</div>
+                <div class="stat-label">وقت المعالجة</div>
+            </div>
+        `;
+        $('#statsGrid').html(statsHtml);
+        
+        // Show analysis report
+        if (response.analysis_report) {
+            const analyzer = response.analysis_report;
+            $('#analysisReport').html(generateAnalysisReportHtml(analyzer));
+        }
+        
+        // Show final report
+        if (response.final_report_html) {
+            $('#finalReport').html(response.final_report_html);
+        }
+    }
+
+    let alertInProgress = false;
+    
+    function showError(errorMessage) {
+        progressSection.hide();
+        uploadSection.show();
+        showAlert(errorMessage, 'error');
+    }
+
+    function showAlert(message, type) {
+        // Prevent recursive alerts
+        if (alertInProgress) return;
+        alertInProgress = true;
+        
+        const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+        const alertHtml = `<div class="alert ${alertClass}">${message}</div>`;
+        
+        // Remove existing alerts
+        $('.alert').remove();
+        
+        // Add new alert
+        $('.import-card').prepend(alertHtml);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            $('.alert').fadeOut();
+            alertInProgress = false;
+        }, 5000);
+        
+        // Reset flag after a short delay to prevent immediate re-triggering
+        setTimeout(() => {
+            alertInProgress = false;
+        }, 100);
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function generateAnalysisReportHtml(analysis) {
+        return `
+            <div class="analysis-summary">
+                <h5>📊 ملخص التحليل</h5>
+                <ul>
+                    <li><strong>إجمالي الأعمدة:</strong> ${analysis.columns_analysis?.total_columns || 0}</li>
+                    <li><strong>إجمالي الصفوف:</strong> ${analysis.statistics?.total_rows?.toLocaleString() || 0}</li>
+                    <li><strong>كثافة البيانات:</strong> ${analysis.statistics?.data_density?.toFixed(1) || 0}%</li>
+                    <li><strong>الذاكرة المستخدمة:</strong> ${analysis.statistics?.memory_usage_mb?.toFixed(2) || 0} ميجابايت</li>
+                </ul>
+                
+                <h5>🔄 تحليل التكرارات</h5>
+                <ul>
+                    <li><strong>الصفوف المكررة:</strong> ${analysis.duplicates_analysis?.complete_duplicates?.toLocaleString() || 0}</li>
+                    <li><strong>حالة الاستيراد:</strong> <span class="text-success">تم استيراد جميع التكرارات</span></li>
+                </ul>
+                
+                <h5>📋 معلومات الأعمدة</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>اسم العمود</th>
+                                <th>القيم المملوءة</th>
+                                <th>القيم الفارغة</th>
+                                <th>القيم الفريدة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateColumnRows(analysis.columns_analysis?.column_details || {})}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    function generateColumnRows(columnDetails) {
+        let rows = '';
+        for (const [colName, details] of Object.entries(columnDetails)) {
+            rows += `
+                <tr>
+                    <td>${colName}</td>
+                    <td>${details.non_null_count?.toLocaleString() || 0}</td>
+                    <td>${details.null_count?.toLocaleString() || 0}</td>
+                    <td>${details.unique_count?.toLocaleString() || 0}</td>
+                </tr>
+            `;
+        }
+        return rows;
+    }
+});
+</script>
+{% endblock %}

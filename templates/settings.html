@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+
+{% block title %}الإعدادات - {{ app_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-modern">
+                <div class="card-header-modern">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2 class="mb-0">
+                                <i class="fas fa-cog me-2"></i>
+                                إعدادات النظام
+                            </h2>
+                            <p class="mb-0 mt-2 opacity-75">إدارة إعدادات النظام والإشعارات</p>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-light">
+                                <i class="fas fa-arrow-right me-2"></i>العودة للرئيسية
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <form method="POST" action="{{ url_for('settings') }}" id="settingsForm">
+                <!-- WhatsApp Settings -->
+                <div class="card card-modern mb-4">
+                    <div class="card-header-modern">
+                        <h5 class="mb-0">
+                            <i class="fab fa-whatsapp me-2"></i>
+                            إعدادات الواتساب
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="whatsapp_enabled" 
+                                           name="whatsapp_enabled" {% if settings.whatsapp_enabled %}checked{% endif %}>
+                                    <label class="form-check-label" for="whatsapp_enabled">
+                                        <strong>تفعيل إشعارات الواتساب</strong>
+                                    </label>
+                                </div>
+                                <small class="text-muted">
+                                    عند التفعيل، سيتم إرسال إشعارات تلقائية للعملاء عند تغيير حالة التأشيرة
+                                </small>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        كيفية عمل إشعارات الواتساب
+                                    </h6>
+                                    <ul class="mb-0">
+                                        <li>سيتم فتح واتساب ويب تلقائياً عند تغيير حالة العميل</li>
+                                        <li>سيتم إعداد الرسالة مسبقاً مع تفاصيل الحالة الجديدة</li>
+                                        <li>يمكنك تعديل الرسالة قبل الإرسال إذا لزم الأمر</li>
+                                        <li>تأكد من تسجيل الدخول إلى واتساب ويب في المتصفح</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Facebook Settings -->
+                <div class="card card-modern mb-4">
+                    <div class="card-header-modern">
+                        <h5 class="mb-0">
+                            <i class="fab fa-facebook me-2"></i>
+                            إعدادات الفيسبوك
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="facebook_link" class="form-label">
+                                    <i class="fas fa-link me-1"></i>
+                                    رابط صفحة الفيسبوك
+                                </label>
+                                <input type="url" class="form-control" id="facebook_link" name="facebook_link" 
+                                       value="{{ settings.facebook_link }}" 
+                                       placeholder="https://www.facebook.com/your-page">
+                                <div class="form-text">
+                                    سيتم إدراج هذا الرابط في رسائل الواتساب المرسلة للعملاء
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="d-flex align-items-center gap-3">
+                                    <a href="{{ settings.facebook_link }}" target="_blank" 
+                                       class="btn btn-outline-primary" id="testFacebookLink">
+                                        <i class="fab fa-facebook me-2"></i>اختبار الرابط
+                                    </a>
+                                    <small class="text-muted">
+                                        انقر لاختبار الرابط والتأكد من صحته
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Message Template -->
+                <div class="card card-modern mb-4">
+                    <div class="card-header-modern">
+                        <h5 class="mb-0">
+                            <i class="fas fa-comment-alt me-2"></i>
+                            نموذج رسالة الواتساب
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-eye me-1"></i>
+                                    معاينة الرسالة
+                                </label>
+                                <div class="border rounded p-3 bg-light" id="messagePreview">
+                                    <div class="text-end" style="direction: rtl;">
+                                        نشكركم عزيزي <strong>[اسم العميل]</strong> اختياركم لشركة تونس للاستشارات والخدمات، تهانينا!<br><br>
+                                        
+                                        حالة تتبع التأشيرة: <strong>[حالة التأشيرة]</strong><br><br>
+                                        
+                                        نأمل من سيادتكم تسليمنا جواز السفر في اقرب وقت ممكن.<br><br>
+                                        
+                                        للمزيد من المعلومات و تتبع ما هو جديد الرجاء التواصل معنا عبر صفحة الفيسبوك وشكرا.<br><br>
+                                        
+                                        رابط الصفحة: <a href="{{ settings.facebook_link }}" target="_blank">{{ settings.facebook_link }}</a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>ملاحظة:</strong> سيتم استبدال [اسم العميل] و [حالة التأشيرة] بالقيم الفعلية عند الإرسال
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Information -->
+                <div class="card card-modern mb-4">
+                    <div class="card-header-modern">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info me-2"></i>
+                            معلومات النظام
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted">اسم النظام</h6>
+                                <p class="mb-0">{{ app_title }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted">الشركة</h6>
+                                <p class="mb-0">{{ company_name }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted">إصدار النظام</h6>
+                                <p class="mb-0">1.0.0</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-muted">تاريخ آخر تحديث</h6>
+                                <p class="mb-0">{{ current_datetime[:10] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="card card-modern">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-end gap-3">
+                            <button type="reset" class="btn btn-outline-secondary">
+                                <i class="fas fa-undo me-2"></i>إعادة تعيين
+                            </button>
+                            <button type="submit" class="btn btn-success-custom">
+                                <i class="fas fa-save me-2"></i>حفظ الإعدادات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Sidebar with Quick Actions -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card card-modern mb-4">
+                <div class="card-header-modern">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        إجراءات سريعة
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="testWhatsApp()">
+                            <i class="fab fa-whatsapp me-2"></i>اختبار الواتساب
+                        </button>
+                        <button class="btn btn-outline-info" onclick="viewSystemStats()">
+                            <i class="fas fa-chart-bar me-2"></i>إحصائيات النظام
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="exportSettings()">
+                            <i class="fas fa-download me-2"></i>تصدير الإعدادات
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="resetSettings()">
+                            <i class="fas fa-refresh me-2"></i>إعادة تعيين الإعدادات
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Help & Support -->
+            <div class="card card-modern">
+                <div class="card-header-modern">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        المساعدة والدعم
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-primary">الأسئلة الشائعة</h6>
+                        <ul class="list-unstyled small">
+                            <li class="mb-2">
+                                <i class="fas fa-question text-muted me-2"></i>
+                                كيف أفعل إشعارات الواتساب؟
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-question text-muted me-2"></i>
+                                لماذا لا تعمل الإشعارات؟
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-question text-muted me-2"></i>
+                                كيف أغير رابط الفيسبوك؟
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="{{ facebook_link }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fab fa-facebook me-2"></i>تواصل معنا
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Test WhatsApp Modal -->
+<div class="modal fade" id="testWhatsAppModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fab fa-whatsapp me-2"></i>
+                    اختبار الواتساب
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="testPhoneNumber" class="form-label">رقم الهاتف للاختبار</label>
+                    <input type="tel" class="form-control" id="testPhoneNumber" 
+                           placeholder="مثال: +216XXXXXXXX">
+                </div>
+                <div class="mb-3">
+                    <label for="testMessage" class="form-label">رسالة الاختبار</label>
+                    <textarea class="form-control" id="testMessage" rows="4" readonly>
+نشكركم عزيزي [عميل تجريبي] اختياركم لشركة تونس للاستشارات والخدمات، تهانينا!
+
+حالة تتبع التأشيرة: [اختبار النظام]
+
+نأمل من سيادتكم تسليمنا جواز السفر في اقرب وقت ممكن.
+
+للمزيد من المعلومات و تتبع ما هو جديد الرجاء التواصل معنا عبر صفحة الفيسبوك وشكرا.
+
+رابط الصفحة: {{ settings.facebook_link }}
+                    </textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-success" onclick="sendTestWhatsApp()">
+                    <i class="fab fa-whatsapp me-2"></i>إرسال الاختبار
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Update Facebook link test button
+document.getElementById('facebook_link').addEventListener('input', function() {
+    const testButton = document.getElementById('testFacebookLink');
+    testButton.href = this.value || '#';
+    
+    // Update message preview
+    updateMessagePreview();
+});
+
+// Update message preview
+function updateMessagePreview() {
+    const facebookLink = document.getElementById('facebook_link').value;
+    const preview = document.getElementById('messagePreview');
+    
+    preview.innerHTML = `
+        <div class="text-end" style="direction: rtl;">
+            نشكركم عزيزي <strong>[اسم العميل]</strong> اختياركم لشركة تونس للاستشارات والخدمات، تهانينا!<br><br>
+            
+            حالة تتبع التأشيرة: <strong>[حالة التأشيرة]</strong><br><br>
+            
+            نأمل من سيادتكم تسليمنا جواز السفر في اقرب وقت ممكن.<br><br>
+            
+            للمزيد من المعلومات و تتبع ما هو جديد الرجاء التواصل معنا عبر صفحة الفيسبوك وشكرا.<br><br>
+            
+            رابط الصفحة: <a href="${facebookLink}" target="_blank">${facebookLink}</a>
+        </div>
+    `;
+}
+
+// Test WhatsApp function
+function testWhatsApp() {
+    const whatsappEnabled = document.getElementById('whatsapp_enabled').checked;
+    
+    if (!whatsappEnabled) {
+        alert('يرجى تفعيل إشعارات الواتساب أولاً');
+        return;
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('testWhatsAppModal'));
+    modal.show();
+}
+
+// Send test WhatsApp message
+function sendTestWhatsApp() {
+    const phoneNumber = document.getElementById('testPhoneNumber').value;
+    const message = document.getElementById('testMessage').value;
+    
+    if (!phoneNumber) {
+        alert('يرجى إدخال رقم الهاتف');
+        return;
+    }
+    
+    // Format phone number
+    let cleanNumber = phoneNumber.replace(/\D/g, '');
+    if (cleanNumber.startsWith('0')) {
+        cleanNumber = '216' + cleanNumber.substring(1);
+    } else if (!cleanNumber.startsWith('216')) {
+        cleanNumber = '216' + cleanNumber;
+    }
+    
+    // Create WhatsApp URL
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://web.whatsapp.com/send?phone=${cleanNumber}&text=${encodedMessage}`;
+    
+    // Open WhatsApp
+    window.open(whatsappUrl, '_blank');
+    
+    // Close modal
+    bootstrap.Modal.getInstance(document.getElementById('testWhatsAppModal')).hide();
+    
+    alert('تم فتح واتساب ويب. تأكد من تسجيل الدخول لإرسال الرسالة.');
+}
+
+// View system stats
+function viewSystemStats() {
+    fetch('/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            let statsHtml = `
+                <div class="row">
+                    <div class="col-6 text-center">
+                        <h3 class="text-primary">${data.total_clients}</h3>
+                        <small>إجمالي العملاء</small>
+                    </div>
+                    <div class="col-6 text-center">
+                        <h3 class="text-success">${data.by_status['اكتملت العملية'] || 0}</h3>
+                        <small>العمليات المكتملة</small>
+                    </div>
+                </div>
+            `;
+            
+            // Show in alert (you could create a proper modal)
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = statsHtml;
+            alert('إحصائيات النظام:\n' + 
+                  'إجمالي العملاء: ' + data.total_clients + '\n' +
+                  'العمليات المكتملة: ' + (data.by_status['اكتملت العملية'] || 0));
+        })
+        .catch(error => {
+            alert('خطأ في تحميل الإحصائيات: ' + error.message);
+        });
+}
+
+// Export settings
+function exportSettings() {
+    const settings = {
+        whatsapp_enabled: document.getElementById('whatsapp_enabled').checked,
+        facebook_link: document.getElementById('facebook_link').value,
+        export_date: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(settings, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = 'tca_settings_' + new Date().toISOString().split('T')[0] + '.json';
+    link.click();
+}
+
+// Reset settings
+function resetSettings() {
+    if (confirm('هل أنت متأكد من إعادة تعيين جميع الإعدادات؟')) {
+        document.getElementById('whatsapp_enabled').checked = true;
+        document.getElementById('facebook_link').value = 'https://www.facebook.com/share/1D4dHp2z74/?mibextid=wwXIfr';
+        updateMessagePreview();
+        alert('تم إعادة تعيين الإعدادات. لا تنس حفظ التغييرات.');
+    }
+}
+
+// Form submission
+document.getElementById('settingsForm').addEventListener('submit', function(e) {
+    showLoading();
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    updateMessagePreview();
+});
+</script>
+{% endblock %}
