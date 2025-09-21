@@ -1,8 +1,8 @@
-# Python cache files
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
 .Python
 build/
 develop-eggs/
@@ -20,119 +20,26 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environment
+# Virtual environments
 venv/
 env/
 ENV/
-.venv/
 
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
-# Logs
+# Application specific
+uploads/
 *.log
-logs/
+*.db-journal
 
-# Database files (keep structure, ignore data)
-*.db
-*.sqlite
-*.sqlite3
-
-# Uploads directory
-uploads/*
-!uploads/.gitkeep
-
-# Test files
-test_*.py
-check_*.py
-fix_*.py
-analyze_*.py
-delete_*.py
-import_*.py
-rapport_*.py
-optimize_*.py
-performance_*.json
-
-# Excel files
-*.xlsx
-*.xls
-
-# Temporary files
-*.tmp
-*.temp
-
-# Node.js dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.npm
-.yarn-integrity
-
-# Build output
-public/
-dist/
-.next/
-.nuxt/
-.cache/
-
-# Package manager lock files (keep package.json, ignore locks)
-package-lock.json
-yarn.lock
-
-# Webpack and build tools
-.webpack/
-.parcel-cache/
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Coverage reports
-coverage/
-.nyc_output/
-
-# Dependency directories
-jspm_packages/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-.env.test
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# Trae AI specific
-.trae/
+# Keep important databases
+!visa_system.db
+!data/visa_tracking.db

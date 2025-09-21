@@ -1,0 +1,133 @@
+{
+  "database_queries": {
+    "get_all_clients_page1": {
+      "execution_time": 0.002299785614013672,
+      "result_count": 50,
+      "total_count": 843
+    },
+    "get_all_clients_page2": {
+      "execution_time": 0.002000093460083008,
+      "result_count": 50,
+      "total_count": 843
+    },
+    "search_clients": {
+      "execution_time": 0.0033948421478271484,
+      "result_count": 0,
+      "total_count": 0
+    },
+    "get_filtered_clients": {
+      "execution_time": 0.001912832260131836,
+      "result_count": 2,
+      "total_count": 2
+    }
+  },
+  "cache_performance": {
+    "time_without_cache": 0.002333402633666992,
+    "time_with_cache": 7.367134094238281e-05,
+    "improvement_percentage": 96.84275058751405,
+    "cache_info": {
+      "total_entries": 1,
+      "active_entries": 1,
+      "expired_entries": 0,
+      "cache_keys": [
+        "clients_get_all_clients_-3037691290820475929"
+      ],
+      "cleaned_expired": 0,
+      "timestamp": "2025-09-15T04:48:19.352590"
+    }
+  },
+  "database_optimization": {
+    "indexes_count": 9,
+    "indexes": [
+      {
+        "name": "idx_client_id",
+        "sql": "CREATE INDEX idx_client_id ON clients(client_id)"
+      },
+      {
+        "name": "idx_full_name",
+        "sql": "CREATE INDEX idx_full_name ON clients(full_name)"
+      },
+      {
+        "name": "idx_whatsapp",
+        "sql": "CREATE INDEX idx_whatsapp ON clients(whatsapp_number)"
+      },
+      {
+        "name": "idx_passport",
+        "sql": "CREATE INDEX idx_passport ON clients(passport_number)"
+      },
+      {
+        "name": "idx_visa_status",
+        "sql": "CREATE INDEX idx_visa_status ON clients(visa_status)"
+      },
+      {
+        "name": "idx_nationality",
+        "sql": "CREATE INDEX idx_nationality ON clients(nationality)"
+      },
+      {
+        "name": "idx_employee",
+        "sql": "CREATE INDEX idx_employee ON clients(responsible_employee)"
+      },
+      {
+        "name": "idx_created_at",
+        "sql": "CREATE INDEX idx_created_at ON clients(created_at)"
+      },
+      {
+        "name": "idx_search_combo",
+        "sql": "CREATE INDEX idx_search_combo ON clients(full_name, client_id, whatsapp_number, passport_number)"
+      }
+    ],
+    "query_plans": {
+      "query_1": {
+        "query": "SELECT * FROM clients WHERE visa_status = 'التقديم' LIMIT 50",
+        "plan": [
+          [
+            4,
+            0,
+            82,
+            "SEARCH clients USING INDEX idx_visa_status (visa_status=?)"
+          ]
+        ],
+        "uses_index": true
+      },
+      "query_2": {
+        "query": "SELECT * FROM clients WHERE nationality = 'تونسية' LIMIT 50",
+        "plan": [
+          [
+            4,
+            0,
+            92,
+            "SEARCH clients USING INDEX idx_nationality (nationality=?)"
+          ]
+        ],
+        "uses_index": true
+      },
+      "query_3": {
+        "query": "SELECT * FROM clients WHERE responsible_employee = 'موظف 1' LIMIT 50",
+        "plan": [
+          [
+            4,
+            0,
+            88,
+            "SEARCH clients USING INDEX idx_employee (responsible_employee=?)"
+          ]
+        ],
+        "uses_index": true
+      },
+      "query_4": {
+        "query": "SELECT * FROM clients WHERE full_name LIKE '%test%' LIMIT 50",
+        "plan": [
+          [
+            3,
+            0,
+            113,
+            "SCAN clients"
+          ]
+        ],
+        "uses_index": false
+      }
+    }
+  },
+  "memory_usage": {
+    "error": "psutil non disponible"
+  }
+}

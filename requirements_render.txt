@@ -1,0 +1,17 @@
+# Web Application Dependencies
+Flask==2.3.3
+Werkzeug==2.3.7
+Jinja2==3.1.2
+
+# Data Processing
+pandas>=2.0.0
+openpyxl>=3.0.0
+
+# HTTP Requests
+requests>=2.30.0
+
+# Database
+# sqlite3 is included with Python
+
+# Utilities
+gunicorn>=21.0.0
