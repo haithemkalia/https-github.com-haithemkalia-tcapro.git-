@@ -1,0 +1,8 @@
+# Requirements pour le déploiement (sans sqlite3)
+Flask==2.3.3
+Werkzeug==2.3.7
+Jinja2==3.1.2
+pandas>=2.3.2
+openpyxl>=3.1.5
+requests>=2.32.5
+# sqlite3 est intégré à Python, pas besoin de l'installer

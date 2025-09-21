@@ -4,13 +4,13 @@ Werkzeug==2.3.7
 Jinja2==3.1.2
 
 # Data Processing
-pandas==2.1.1
-openpyxl==3.1.2
+pandas>=2.3.2
+openpyxl>=3.1.5
 
 # HTTP Requests
-requests==2.31.0
+requests>=2.32.5
 
 # Database
-sqlite3
+# sqlite3 is built-in to Python, no need to install via pip
 
 # Utilities
