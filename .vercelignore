@@ -1,0 +1,98 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads directory
+uploads/
+
+# Test files
+test_*.py
+check_*.py
+fix_*.py
+analyze_*.py
+delete_*.py
+import_*.py
+rapport_*.py
+optimize_*.py
+performance_*.json
+
+# Excel files
+*.xlsx
+*.xls
+
+# Temporary files
+*.tmp
+*.temp
+
+# Node.js and build files
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Build output
+public/
+dist/
+.next/
+.nuxt/
+.cache/
+
+# Package manager lock files
+package-lock.json
+yarn.lock
+
+# Webpack and build tools
+.webpack/
+.parcel-cache/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
