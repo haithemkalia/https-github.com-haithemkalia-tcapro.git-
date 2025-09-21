@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة العملاء - 🛂 نظام تتبع التأشيرات الذكي - TCA</title>
+    
+    <!-- Bootstrap 5 RTL CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts - Arabic Support -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="/static/css/custom.css" rel="stylesheet">
+    
+    
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="overlay" id="loadingOverlay"></div>
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">
+                    🛂 🛂 نظام تتبع التأشيرات الذكي - TCA
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link " href="/">
+                                <i class="fas fa-home"></i> الرئيسية
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/clients">
+                                <i class="fas fa-users"></i> إدارة العملاء
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/client/add">
+                                <i class="fas fa-user-plus"></i> إضافة عميل
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/import-excel">
+                                <i class="fas fa-file-excel"></i> استيراد Excel
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/unrestricted-import">
+                                <i class="fas fa-rocket"></i> استيراد شامل بدون قيود
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/settings">
+                                <i class="fas fa-cog"></i> الإعدادات
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.facebook.com/share/1D4dHp2z74/?mibextid=wwXIfr" target="_blank">
+                                <i class="fab fa-facebook"></i> صفحة الفيسبوك
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Flash Messages -->
+        
+            
+        
+        
+        <!-- Main Content -->
+        <div class="content-area">
+            
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-modern">
+                <div class="card-header-modern">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2 class="mb-0">
+                                <i class="fas fa-users me-2"></i>
+                                إدارة العملاء
+                            </h2>
+                            <p class="mb-0 mt-2 opacity-75">عرض وإدارة جميع عملاء النظام</p>
+                        </div>
+                        <div class="col-auto">
+                            <a href="/client/add" class="btn btn-success-custom">
+                                <i class="fas fa-plus me-2"></i>إضافة عميل جديد
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search and Filters -->
+    <div class="row mb-4">
+   

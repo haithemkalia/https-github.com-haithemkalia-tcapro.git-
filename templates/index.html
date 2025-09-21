@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+{% block title %}الرئيسية - {{ app_title }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+ <!-- En-tête du tableau de bord -->
+ <div class="row mb-4">
+  <div class="col-12">
+   <div class="card card-modern">
+    <div class="card-header-modern">
+     <div class="row align-items-center">
+      <div class="col">
+       <h2 class="mb-0">
+        <i class="fas fa-tachometer-alt me-2"></i> لوحة التحكم الرئيسية
+       </h2>
+       <p class="mb-0 mt-2 opacity-75">نظرة شاملة على حالة طلبات التأشيرات</p>
+      </div>
+      <div class="col-auto">
+       <div class="text-end">
+        <small class="opacity-75">آخر تحديث: {{ current_datetime }}</small>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+
+ <!-- Statistiques principales - Calculées précisément -->
+ <div class="row mb-4">
+  <div class="col-lg-3 col-md-6 mb-3">
+   <div class="stats-card">
+    <div class="stats-number">{{ stats.total_clients or 0 }}</div>
+    <div class="stats-label">
+     <i class="fas fa-users me-1"></i> إجمالي العملاء
+    </div>
+    <div class="stats-detail">
+     <small class="text-muted">من قاعدة البيانات الكاملة</small>
+    </div>
+   </div>
+  </div>
+  <div class="col-lg-3 col-md-6 mb-3">
+   <div class="stats-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+    <div class="stats-number">{{ stats.by_status.get('اكتملت العملية', 0) }}</div>
+    <div class="stats-label">
+     <i class="fas fa-check-circle me-1"></i> العمليات المكتملة
+    </div>
+    <div class="stats-detail">
+     <small class="text-white-50">مكتملة بالكامل</small>
+    </div>
+   </div>
+  </div>
+  <div class="col-lg-3 col-md-6 mb-3">
+   <div class="stats-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+    <div class="stats-number">{{ stats.by_status.get('تمت الموافقة على التأشيرة', 0) }}</div>
+    <div class="stats-label">
+     <i class="fas fa-passport me-1"></i> التأشيرات المعتمدة
+    </div>
+    <div class="stats-detail">
+     <small class="text-white-50">معتمدة من السفارة</small>
+    </div>
+   </div>
+  </div>
+  <div class="col-lg-3 col-md-6 mb-3">
+   <div class="stats-card" style="background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);">
+    <div class="stats-number">{{ stats.by_status.get('تم التقديم في السيستام', 0) }}</div>
+    <div class="stats-label">
+     <i class="fas fa-file-alt me-1"></i> طلبات جديدة
+    </div>
+    <div class="stats-detail">
+     <small class="text-white-50">في النظام</small>
+    </div>
+   </div>
+  </div>
+ </div>
+
+ <!-- Graphiques et distributions -->
+ <div class="row">
+  <!-- Distribution des statuts de visa - Détails complets -->
+  <div class="col-lg-6 mb-4">
+   <div class="card card-modern h-100">
+    <div class="card-header-modern">
+     <h5 class="mb-0">
+      <i class="fas fa-chart-pie me-2"></i> توزيع حالات التأشيرات
+     </h5>
+     <small class="text-muted">إحصائيات دقيقة من {{ stats.total_clients or 0 }} عميل</small>
+    </div>
+    <div class="card-body">
+     <div class="row">
+      <!-- اكتملت العملية -->
+      <div class="col-6 text-center mb-3">
+       <div class="p-3 rounded" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+        <h4 class="mb-1">{{ stats.by_status.get('اكتملت العملية', 0) }}</h4>
+        <small>اكتملت العملية</small>
+        {% if stats.total_clients > 0 %}
+        <div class="mt-2">
+         <small class="opacity-75">{{ "%.1f"|format((stats.by_status.get('اكتملت العملية', 0) / stats.total_clients * 100)) }}%</small>
+        </div>
+        {% endif %}
+       </div>
+      </div>
+      
+      <!-- تمت الموافقة على التأشيرة -->
+      <div class="col-6 text-center mb-3">
+       <div class="p-3 rounded" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); color: white;">
+        <h4 class="mb-1">{{ stats.by_status.get('تمت الموافقة على التأشيرة', 0) }}</h4>
+        <small>تمت الموافقة على التأشيرة</small>
+        {% if stats.total_clients > 0 %}
+        <div class="mt-2">
+         <small class="opacity-75">{{ "%.1f"|format((stats.by_status.get('تمت الموافقة على التأشيرة', 0) / stats.total_clients * 100)) }}%</small>
+        </div>
+        {% endif %}
+       </div>
+      </div>
+      
+      <!-- التأشيرة غير موافق عليها -->
+      <div class="col-6 text-center mb-3">
+       <div class="p-3 rounded" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); color: white;">
+        <h4 class="mb-1">{{ stats.by_status.get('التأشيرة غير موافق عليها', 0) }}</h4>
+        <small>التأشيرة غير موافق عليها</small>
+        {% if stats.total_clients > 0 %}
+        <div class="mt-2">
+         <small class="opacity-75">{{ "%.1f"|format((stats.by_status.get('التأشيرة غير موافق عليها', 0) / stats.total_clients * 100)) }}%</small>
+        </div>
+        {% endif %}
+       </div>
+      </div>
+      
+      <!-- تم التقديم في السيستام -->
+      <div class="col-6 text-center mb-3">
+       <div class="p-3 rounded" style="background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); color: white;">
+        <h4 class="mb-1">{{ stats.by_status.get('تم التقديم في السيستام', 0) }}</h4>
+        <small>تم التقديم في السيستام</small>
+        {% if stats.total_clients > 0 %}
+        <div class="mt-2">
+         <small class="opacity-75">{{ "%.1f"|format((stats.by_status.get('تم التقديم في السيستام', 0) / stats.total_clients * 100)) }}%</small>
+        </div>
+        {% endif %}
+       </div>
+      </div>
+      
+      <!-- تم التقديم إلى السفارة -->
+      <div class="col-12 text-center mb-3">
+       <div class="p-3 rounded" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); color: white;">
+        <h4 class="mb-1">{{ stats.by_status.get('تم التقديم إلى السفارة', 0) }}</h4>
+        <small>تم التقديم إلى السفارة</small>
+        {% if stats.total_clients > 0 %}
+        <div class="mt-2">
+         <small class="opacity-75">{{ "%.1f"|format((stats.by_status.get('تم التقديم إلى السفارة', 0) / stats.total_clients * 100)) }}%</small>
+        </div>
+        {% endif %}
+       </div>
+      </div>
+     </div>
+     
+     <!-- Résumé des statistiques -->
+     <div class="mt-3 p-3 bg-light rounded">
+      <h6 class="mb-2">📊 ملخص الإحصائيات:</h6>
+      <div class="row text-center">
+       <div class="col-4">
+        <strong class="text-success">{{ stats.by_status.get('اكتملت العملية', 0) + stats.by_status.get('تمت الموافقة على التأشيرة', 0) }}</strong>
+        <br><small class="text-muted">إجمالي المكتملة</small>
+       </div>
+       <div class="col-4">
+        <strong class="text-warning">{{ stats.by_status.get('التأشيرة غير موافق عليها', 0) }}</strong>
+        <br><small class="text-muted">غير معتمدة</small>
+       </div>
+       <div class="col-4">
+        <strong class="text-info">{{ stats.by_status.get('تم التقديم في السيستام', 0) + stats.by_status.get('تم التقديم إلى السفارة', 0) }}</strong>
+        <br><small class="text-muted">قيد المعالجة</small>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- Distribution des nationalités - Détails complets -->
+  <div class="col-lg-6 mb-4">
+   <div class="card card-modern h-100">
+    <div class="card-header-modern">
+     <h5 class="mb-0">
+      <i class="fas fa-globe me-2"></i> توزيع الجنسيات
+     </h5>
+     <small class="text-muted">جميع الجنسيات من {{ stats.total_clients or 0 }} عميل</small>
+    </div>
+    <div class="card-body">
+     <div class="row">
+      {% for nationality, count in stats.by_nationality.items() %}
+      {% if count > 0 %}
+      <div class="col-6 text-center mb-3">
+       <div class="p-3 rounded" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <h4 class="mb-1">{{ count }}</h4>
+        <small>{{ nationality }}</small>
+        {% if stats.total_clients > 0 %}
+        <div class="mt-2">
+         <small class="opacity-75">{{ "%.1f"|format((count / stats.total_clients * 100)) }}%</small>
+        </div>
+        {% endif %}
+       </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+     </div>
+     
+     <!-- Résumé des nationalités -->
+     <div class="mt-3 p-3 bg-light rounded">
+      <h6 class="mb-2">🌍 ملخص الجنسيات:</h6>
+      <div class="row text-center">
+       {% set total_with_nationality = stats.by_nationality.values() | sum %}
+       <div class="col-6">
+        <strong class="text-primary">{{ total_with_nationality }}</strong>
+        <br><small class="text-muted">مع جنسية محددة</small>
+       </div>
+       <div class="col-6">
+        <strong class="text-secondary">{{ stats.total_clients - total_with_nationality }}</strong>
+        <br><small class="text-muted">بدون جنسية</small>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+
+ <!-- Clients récents et statistiques des employés -->
+ <div class="row">
+  <!-- Clients récents -->
+  <div class="col-lg-8 mb-4">
+   <div class="card card-modern">
+    <div class="card-header-modern">
+     <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+       <i class="fas fa-clock me-2"></i> العملاء الجدد
+      </h5>
+      <a href="{{ url_for('clients_list') }}" class="btn btn-light btn-sm"> عرض الكل <i class="fas fa-arrow-left ms-1"></i> </a>
+     </div>
+    </div>
+    <div class="card-body">
+     {% if stats.recent_clients %}
+     <div class="table-responsive">
+      <table class="table table-hover">
+       <thead class="table-light">
+        <tr>
+         <th>الاسم الكامل</th>
+         <th>الجنسية</th>
+         <th>حالة التأشيرة</th>
+         <th>الموظف المسؤول</th>
+         <th>تاريخ الإضافة</th>
+        </tr>
+       </thead>
+       <tbody>
+        {% for client in stats.recent_clients %}
+        <tr>
+         <td>
+          <strong>{{ client.full_name }}</strong>
+          <br><small class="text-muted">{{ client.client_id }}</small>
+         </td>
+         <td>
+          <span class="badge bg-secondary">{{ client.nationality or 'غير محدد' }}</span>
+         </td>
+         <td>
+          <span class="status-badge status-{{ (client.visa_status or 'غير محدد').replace(' ', '-') }}">
+           {{ client.visa_status or 'غير محدد' }}
+          </span>
+         </td>
+         <td>{{ client.responsible_employee or 'غير محدد' }}</td>
+         <td>
+          <small>{{ client.created_at[:10] if client.created_at else 'غير محدد' }}</small>
+         </td>
+        </tr>
+        {% endfor %}
+       </tbody>
+      </table>
+     </div>
+     {% else %}
+     <div class="text-center py-4">
+      <i class="fas fa-users fa-3x text-muted mb-3"></i>
+      <h5 class="text-muted">لا توجد بيانات عملاء</h5>
+      <p class="text-muted">ابدأ بإضافة عملاء جدد لعرض البيانات هنا</p>
+      <a href="{{ url_for('add_client') }}" class="btn btn-primary-custom">
+       <i class="fas fa-plus me-2"></i>إضافة عميل جديد
+      </a>
+     </div>
+     {% endif %}
+    </div>
+   </div>
+  </div>
+
+  <!-- Statistiques des employés - Détails complets -->
+  <div class="col-lg-4 mb-4">
+   <div class="card card-modern">
+    <div class="card-header-modern">
+     <h5 class="mb-0">
+      <i class="fas fa-user-tie me-2"></i> إحصائيات الموظفين
+     </h5>
+     <small class="text-muted">توزيع العملاء حسب الموظف المسؤول</small>
+    </div>
+    <div class="card-body">
+     {% for employee, count in stats.by_employee.items() %}
+     {% if count > 0 %}
+     <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+       <strong>{{ employee }}</strong>
+       {% if stats.total_clients > 0 %}
+       <br><small class="text-muted">{{ "%.1f"|format((count / stats.total_clients * 100)) }}%</small>
+       {% endif %}
+      </div>
+      <div>
+       <span class="badge bg-primary rounded-pill">{{ count }}</span>
+      </div>
+     </div>
+     <div class="progress mb-3" style="height: 8px;">
+      <div class="progress-bar" role="progressbar" 
+           style="width: {{ (count / stats.total_clients * 100) if stats.total_clients > 0 else 0 }}%" 
+           aria-valuenow="{{ count }}" aria-valuemin="0" aria-valuemax="{{ stats.total_clients }}">
+      </div>
+     </div>
+     {% endif %}
+     {% endfor %}
+     
+     <!-- Résumé des employés -->
+     <div class="mt-3 p-3 bg-light rounded">
+      <h6 class="mb-2">👥 ملخص الموظفين:</h6>
+      {% set total_with_employee = stats.by_employee.values() | sum %}
+      <div class="row text-center">
+       <div class="col-6">
+        <strong class="text-primary">{{ total_with_employee }}</strong>
+        <br><small class="text-muted">مع موظف مسؤول</small>
+       </div>
+       <div class="col-6">
+        <strong class="text-secondary">{{ stats.total_clients - total_with_employee }}</strong>
+        <br><small class="text-muted">بدون موظف مسؤول</small>
+       </div>
+      </div>
+      
+      <!-- Top employé -->
+      {% set top_employee = stats.by_employee.items() | sort(attribute=1, reverse=true) | first %}
+      {% if top_employee and top_employee[1] > 0 %}
+      <div class="mt-2 text-center">
+       <small class="text-success">
+        <i class="fas fa-crown me-1"></i>
+        الأعلى: {{ top_employee[0] }} ({{ top_employee[1] }} عميل)
+       </small>
+      </div>
+      {% endif %}
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+
+ <!-- Actions rapides -->
+ <div class="row">
+  <div class="col-12">
+   <div class="card card-modern">
+    <div class="card-header-modern">
+     <h5 class="mb-0">
+      <i class="fas fa-bolt me-2"></i> إجراءات سريعة
+     </h5>
+    </div>
+    <div class="card-body">
+     <div class="row">
+      <div class="col-lg-3 col-md-6 mb-3">
+       <a href="{{ url_for('add_client') }}" class="btn btn-success-custom w-100 h-100 d-flex flex-column justify-content-center align-items-center p-4">
+        <i class="fas fa-user-plus fa-2x mb-2"></i>
+        <strong>إضافة عميل جديد</strong>
+        <small class="mt-1">إضافة عميل جديد للنظام</small>
+       </a>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-3">
+       <a href="{{ url_for('import_excel') }}" class="btn btn-primary-custom w-100 h-100 d-flex flex-column justify-content-center align-items-center p-4">
+        <i class="fas fa-file-excel fa-2x mb-2"></i>
+        <strong>استيراد Excel</strong>
+        <small class="mt-1">استيراد عملاء من ملف Excel</small>
+       </a>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-3">
+       <a href="{{ url_for('clients_list') }}" class="btn btn-warning-custom w-100 h-100 d-flex flex-column justify-content-center align-items-center p-4">
+        <i class="fas fa-search fa-2x mb-2"></i>
+        <strong>البحث والتصفية</strong>
+        <small class="mt-1">البحث في قاعدة العملاء</small>
+       </a>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-3">
+       <a href="{{ url_for('analytics_dashboard') }}" class="btn btn-info-custom w-100 h-100 d-flex flex-column justify-content-center align-items-center p-4">
+        <i class="fas fa-chart-line fa-2x mb-2"></i>
+        <strong>التحليل المتقدم</strong>
+        <small class="mt-1">تحليل شامل وتقارير مفصلة</small>
+       </a>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-3">
+       <a href="{{ url_for('settings') }}" class="btn btn-danger-custom w-100 h-100 d-flex flex-column justify-content-center align-items-center p-4">
+        <i class="fas fa-cog fa-2x mb-2"></i>
+        <strong>الإعدادات</strong>
+        <small class="mt-1">إعدادات النظام والإشعارات</small>
+       </a>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+{% endblock %}
