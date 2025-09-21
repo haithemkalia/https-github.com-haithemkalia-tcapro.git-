@@ -8,6 +8,7 @@ Application Web Flask pour la gestion des visas
 """
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, make_response
+from export_endpoint import add_export_to_app
 from werkzeug.utils import secure_filename
 import os
 import sys
@@ -54,6 +55,9 @@ excel_handler = ExcelHandler()
 # Importer et initialiser le contrôleur d'analyse
 from src.controllers.analytics_controller import AnalyticsController
 analytics_controller = AnalyticsController(db_manager)
+
+# Ajouter les routes d'export
+add_export_to_app(app, client_controller)
 
 # Configuration pour les fichiers statiques RTL
 @app.context_processor
