@@ -45,6 +45,8 @@ logs/
 *.db
 *.sqlite
 *.sqlite3
+# Exception: inclure visa_system.db pour Render
+!visa_system.db
 
 # Uploads directory
 uploads/*
