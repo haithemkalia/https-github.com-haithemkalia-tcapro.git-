@@ -18,18 +18,10 @@ class DatabaseManager:
         # Pour Render : utiliser la base de données principale qui contient tous les clients
         import os
         if os.environ.get('RENDER'):
-            # Utiliser la base de données principale avec tous les clients (975 clients)
-            if os.path.exists('visa_system.db'):
-                self.db_path = 'visa_system.db'
-            elif os.path.exists('clients.db'):
-                self.db_path = 'clients.db'
-            elif os.path.exists('data/visa_tracking.db'):
-                self.db_path = 'data/visa_tracking.db'
-            else:
-                # Fallback vers le fichier temporaire si aucune base principale n'est trouvée
-                import tempfile
-                temp_dir = tempfile.gettempdir()
-                self.db_path = os.path.join(temp_dir, 'visa_system_render.db')
+            # Utiliser un chemin persistant sur Render
+            render_data_dir = '/opt/render/project/data'
+            os.makedirs(render_data_dir, exist_ok=True)
+            self.db_path = os.path.join(render_data_dir, 'visa_system.db')
         elif os.environ.get('VERCEL'):
             # Pour Vercel : utiliser un fichier temporaire
             import tempfile
