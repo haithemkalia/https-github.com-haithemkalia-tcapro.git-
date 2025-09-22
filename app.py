@@ -72,6 +72,26 @@ def inject_rtl_support():
         'current_datetime': datetime.now().strftime('%Y-%m-%d %H:%M')
     }
 
+# Route de test pour vérifier le déploiement
+@app.route('/health')
+def health_check():
+    """Vérifier que l'application fonctionne"""
+    try:
+        # Tester la connexion DB
+        db_manager.get_connection()
+        return jsonify({
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'database': 'connected',
+            'environment': 'production' if os.environ.get('VERCEL') else 'development'
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
 # Routes principales
 @app.route('/')
 def index():

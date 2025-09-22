@@ -13,9 +13,16 @@ import json
 class DatabaseManager:
     """Gestionnaire de base de données SQLite"""
     
-    def __init__(self, db_path: str = 'visa_system.db'):
+    def __init__(self, db_path: str = None):
         """Initialiser le gestionnaire de base de données"""
-        self.db_path = db_path
+        # Pour Vercel : utiliser SQLite en mémoire ou un chemin temporaire
+        import os
+        if os.environ.get('VERCEL'):
+            # En production Vercel : utiliser SQLite en mémoire
+            self.db_path = ':memory:'
+        else:
+            # En local : utiliser le fichier local
+            self.db_path = db_path or 'visa_system.db'
         self.init_database()
     
     def init_database(self):
@@ -52,6 +59,39 @@ class DatabaseManager:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        
+        # Si on est sur Vercel et que la base est vide, ajouter des données de test
+        import os
+        if os.environ.get('VERCEL') and self.db_path == ':memory:':
+            cursor.execute('SELECT COUNT(*) FROM clients')
+            count = cursor.fetchone()[0]
+            if count == 0:
+                # Ajouter quelques clients de test
+                test_clients = [
+                    {
+                        'client_id': 'TEST001',
+                        'full_name': 'Client Test 1',
+                        'whatsapp_number': '+21612345678',
+                        'nationality': 'Tunisienne',
+                        'visa_status': 'En cours',
+                        'responsible_employee': 'Employé Test'
+                    },
+                    {
+                        'client_id': 'TEST002', 
+                        'full_name': 'Client Test 2',
+                        'whatsapp_number': '+21687654321',
+                        'nationality': 'Marocaine',
+                        'visa_status': 'Validé',
+                        'responsible_employee': 'Employé Test'
+                    }
+                ]
+                
+                for client in test_clients:
+                    cursor.execute('''
+                        INSERT INTO clients (client_id, full_name, whatsapp_number, nationality, visa_status, responsible_employee)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    ''', (client['client_id'], client['full_name'], client['whatsapp_number'], 
+                          client['nationality'], client['visa_status'], client['responsible_employee']))
         
         conn.commit()
         conn.close()

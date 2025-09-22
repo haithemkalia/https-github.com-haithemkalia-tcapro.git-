@@ -3,17 +3,30 @@
   "builds": [
     {
       "src": "app.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
     }
   ],
   "routes": [
+    {
+      "src": "/health",
+      "dest": "app.py"
+    },
     {
       "src": "/(.*)",
       "dest": "app.py"
     }
   ],
   "env": {
-    "PYTHONPATH": "."
+    "PYTHONPATH": ".",
+    "VERCEL": "true"
+  },
+  "functions": {
+    "app.py": {
+      "maxDuration": 30
+    }
   },
   "installCommand": "pip install -r requirements-deploy.txt"
 }
