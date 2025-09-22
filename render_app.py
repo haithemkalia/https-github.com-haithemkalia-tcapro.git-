@@ -224,7 +224,69 @@ def clients_list():
 @app.route('/add_client')
 def add_client():
     """Page d'ajout de client"""
-    return render_template('add_client.html')
+    return redirect(url_for('add_client_form'))
+
+@app.route('/client/edit/<client_id>', methods=['GET', 'POST'])
+def edit_client(client_id):
+    """Modifier un client existant"""
+    try:
+        client = client_controller.get_client_by_id(client_id)
+        if not client:
+            flash('العميل غير موجود', 'error')
+            return redirect(url_for('clients_list'))
+        
+        if request.method == 'POST':
+            # Récupérer l'ancien statut pour les notifications
+            old_status = client.get('visa_status')
+            
+            # Récupérer les données du formulaire
+            client_data = {
+                'client_id': request.form.get('client_id', '').strip(),
+                'full_name': request.form.get('full_name', '').strip(),
+                'whatsapp_number': request.form.get('whatsapp_number', '').strip(),
+                'file_date': request.form.get('application_date', '').strip(),
+                'reception_date': request.form.get('receipt_date', '').strip(),
+                'passport_number': request.form.get('passport_number', '').strip(),
+                'passport_status': request.form.get('passport_status', '').strip(),
+                'nationality': request.form.get('nationality', '').strip(),
+                'visa_status': request.form.get('visa_status', 'التقديم').strip(),
+                'processed_by': request.form.get('processed_by', '').strip(),
+                'summary': request.form.get('summary', '').strip(),
+                'notes': request.form.get('notes', '').strip(),
+                'responsible_employee': request.form.get('responsible_employee', '').strip()
+            }
+            
+            # Mettre à jour le client
+            success = client_controller.update_client(client_id, client_data)
+            
+            if success:
+                flash('تم تحديث العميل بنجاح! ✅', 'success')
+                
+                # Envoyer notification WhatsApp si le statut a changé
+                new_status = client_data.get('visa_status')
+                if (old_status != new_status and 
+                    whatsapp_controller.is_whatsapp_enabled() and 
+                    client_data.get('whatsapp_number')):
+                    whatsapp_controller.send_status_notification(
+                        client_data['client_id'], 
+                        new_status, 
+                        client_data['whatsapp_number']
+                    )
+                
+                return redirect(url_for('clients_list'))
+            else:
+                flash('فشل في تحديث العميل', 'error')
+        
+        return render_template('edit_client.html',
+                             client=client,
+                             passport_statuses=Client.PASSPORT_STATUS_OPTIONS,
+                             nationalities=Client.NATIONALITY_OPTIONS,
+                             visa_statuses=Client.VISA_STATUS_OPTIONS,
+                             employees=Client.EMPLOYEE_OPTIONS)
+        
+    except Exception as e:
+        flash(f'خطأ في تحديث العميل: {str(e)}', 'error')
+        return redirect(url_for('clients_list'))
 
 @app.route('/analytics')
 def analytics():
@@ -289,6 +351,101 @@ def import_excel():
 def unrestricted_import_page():
     """Page d'import sans restrictions"""
     return render_template('unrestricted_import.html')
+
+@app.route('/client/delete/<client_id>', methods=['POST'])
+def delete_client(client_id):
+    """Supprimer un client avec confirmation et feedback"""
+    try:
+        # Récupérer les informations du client avant suppression
+        client_info = client_controller.get_client_by_id(client_id)
+        if not client_info:
+            flash('❌ العميل غير موجود!', 'error')
+            return redirect(url_for('clients_list'))
+        
+        client_name = client_info.get('full_name', 'غير محدد')
+        
+        # Supprimer le client
+        success = client_controller.delete_client(client_id)
+        
+        if success:
+            flash(f'✅ تم حذف العميل "{client_name}" بنجاح!', 'success')
+        else:
+            flash(f'❌ فشل في حذف العميل "{client_name}"', 'error')
+    except Exception as e:
+        flash(f'❌ خطأ في حذف العميل: {str(e)}', 'error')
+    
+    return redirect(url_for('clients_list'))
+
+@app.route('/client/add', methods=['GET', 'POST'])
+def add_client_form():
+    """Ajouter un nouveau client"""
+    if request.method == 'POST':
+        try:
+            # Récupérer les données du formulaire
+            client_data = {
+                'client_id': request.form.get('client_id', '').strip(),
+                'full_name': request.form.get('full_name', '').strip(),
+                'whatsapp_number': request.form.get('whatsapp_number', '').strip(),
+                'file_date': request.form.get('application_date', '').strip(),
+                'reception_date': request.form.get('receipt_date', '').strip(),
+                'passport_number': request.form.get('passport_number', '').strip(),
+                'passport_status': request.form.get('passport_status', '').strip(),
+                'nationality': request.form.get('nationality', '').strip(),
+                'visa_status': request.form.get('visa_status', 'التقديم').strip(),
+                'processed_by': request.form.get('processed_by', '').strip(),
+                'summary': request.form.get('summary', '').strip(),
+                'notes': request.form.get('notes', '').strip(),
+                'responsible_employee': request.form.get('responsible_employee', '').strip()
+            }
+            
+            # Validation des champs obligatoires
+            if not client_data['full_name']:
+                flash('يرجى إدخال الاسم الكامل', 'error')
+                return render_template('add_client.html', 
+                                     nationalities=Client.NATIONALITY_OPTIONS,
+                                     passport_statuses=Client.PASSPORT_STATUS_OPTIONS,
+                                     visa_statuses=Client.VISA_STATUS_OPTIONS,
+                                     employees=Client.EMPLOYEE_OPTIONS)
+            
+            if not client_data['passport_number']:
+                flash('يرجى إدخال رقم جواز السفر', 'error')
+                return render_template('add_client.html', 
+                                     nationalities=Client.NATIONALITY_OPTIONS,
+                                     passport_statuses=Client.PASSPORT_STATUS_OPTIONS,
+                                     visa_statuses=Client.VISA_STATUS_OPTIONS,
+                                     employees=Client.EMPLOYEE_OPTIONS)
+            
+            # Vérifier l'unicité du numéro de passeport
+            if not db_manager.is_passport_number_unique(client_data['passport_number']):
+                flash('رقم جواز السفر موجود مسبقاً. يرجى إدخال رقم آخر.', 'error')
+                return render_template('add_client.html', 
+                                     nationalities=Client.NATIONALITY_OPTIONS,
+                                     passport_statuses=Client.PASSPORT_STATUS_OPTIONS,
+                                     visa_statuses=Client.VISA_STATUS_OPTIONS,
+                                     employees=Client.EMPLOYEE_OPTIONS)
+            
+            # Ajouter le client
+            client_id = client_controller.add_client(client_data)
+            
+            if client_id:
+                flash('تم إضافة العميل بنجاح! ✅', 'success')
+                
+                # Envoyer message de bienvenue WhatsApp si activé
+                if whatsapp_controller.is_whatsapp_enabled() and client_data.get('whatsapp_number'):
+                    whatsapp_controller.send_welcome_notification(client_data['client_id'])
+                
+                return redirect(url_for('clients_list'))
+            else:
+                flash('فشل في إضافة العميل', 'error')
+                
+        except Exception as e:
+            flash(f'خطأ في إضافة العميل: {str(e)}', 'error')
+    
+    return render_template('add_client.html',
+                         passport_statuses=Client.PASSPORT_STATUS_OPTIONS,
+                         nationalities=Client.NATIONALITY_OPTIONS,
+                         visa_statuses=Client.VISA_STATUS_OPTIONS,
+                         employees=Client.EMPLOYEE_OPTIONS)
 
 if __name__ == '__main__':
     # Configuration pour Render
