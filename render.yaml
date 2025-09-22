@@ -11,3 +11,7 @@ services:
         value: "true"
       - key: PYTHONPATH
         value: "src"
+    disk:
+      name: data
+      mountPath: /opt/render/project/data
+      sizeGB: 1
