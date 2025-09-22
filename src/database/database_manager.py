@@ -15,13 +15,13 @@ class DatabaseManager:
     
     def __init__(self, db_path: str = None):
         """Initialiser le gestionnaire de base de données"""
-        # Pour Vercel : utiliser SQLite en mémoire ou un chemin temporaire
+        # Pour Vercel/Render : utiliser SQLite en mémoire ou un chemin temporaire
         import os
         import tempfile
-        if os.environ.get('VERCEL'):
-            # En production Vercel : utiliser un fichier temporaire
+        if os.environ.get('VERCEL') or os.environ.get('RENDER'):
+            # En production Vercel/Render : utiliser un fichier temporaire
             temp_dir = tempfile.gettempdir()
-            self.db_path = os.path.join(temp_dir, 'visa_system_vercel.db')
+            self.db_path = os.path.join(temp_dir, 'visa_system_render.db')
         else:
             # En local : utiliser le fichier local
             self.db_path = db_path or 'visa_system.db'
@@ -63,9 +63,9 @@ class DatabaseManager:
             )
         ''')
         
-        # Si on est sur Vercel et que la base est vide, ajouter des données de test
+        # Si on est sur Vercel/Render et que la base est vide, ajouter des données de test
         import os
-        if os.environ.get('VERCEL'):
+        if os.environ.get('VERCEL') or os.environ.get('RENDER'):
             cursor.execute('SELECT COUNT(*) FROM clients')
             count = cursor.fetchone()[0]
             if count == 0:
