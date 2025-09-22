@@ -78,13 +78,14 @@ class DatabaseManager:
             )
         ''')
         
-        # Si on est sur Vercel/Render et que la base est vide, ajouter des données de test
+        # Ne pas ajouter de données de test sur Render - utiliser les données réelles existantes
+        # Les données de test ne sont ajoutées que pour Vercel
         import os
-        if os.environ.get('VERCEL') or os.environ.get('RENDER'):
+        if os.environ.get('VERCEL'):
             cursor.execute('SELECT COUNT(*) FROM clients')
             count = cursor.fetchone()[0]
             if count == 0:
-                # Ajouter quelques clients de test
+                # Ajouter quelques clients de test uniquement pour Vercel
                 test_clients = [
                     {
                         'client_id': 'TEST001',
