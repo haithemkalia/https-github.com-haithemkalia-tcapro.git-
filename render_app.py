@@ -7,6 +7,7 @@ Application Render avec base de données préchargée
 
 import os
 import sys
+import sqlite3
 import tempfile
 import shutil
 from pathlib import Path
@@ -15,28 +16,45 @@ from pathlib import Path
 os.environ['RENDER'] = 'true'
 os.environ['PYTHONPATH'] = 'src'
 
-# Copier la base de données depuis le projet vers le dossier temporaire
+# Utiliser la base de données principale au lieu de la copier
 def setup_render_database():
-    """Préparer la base de données pour Render"""
+    """Préparer la base de données principale pour Render"""
     
-    # Chemins
-    source_db = 'data/visa_tracking.db'
-    target_db = os.path.join(tempfile.gettempdir(), 'visa_system_render.db')
+    # Utiliser la base de données principale qui contient tous les clients
+    # Priorité: visa_system.db > clients.db > data/visa_tracking.db
+    
+    main_db = None
+    
+    if os.path.exists('visa_system.db'):
+        main_db = 'visa_system.db'
+    elif os.path.exists('clients.db'):
+        main_db = 'clients.db'
+    elif os.path.exists('data/visa_tracking.db'):
+        main_db = 'data/visa_tracking.db'
+    else:
+        print("❌ Aucune base de données principale trouvée!")
+        return False
+    
+    # Pour Render, utiliser directement la base principale
+    target_db = main_db
     
     print(f"🔄 Configuration de la base de données Render...")
-    print(f"📁 Source: {source_db}")
-    print(f"📁 Cible: {target_db}")
+    print(f"📁 Base de données principale: {main_db}")
     
     try:
-        # Si la base source existe, la copier
-        if os.path.exists(source_db):
-            shutil.copy2(source_db, target_db)
-            print("✅ Base de données copiée avec succès!")
-        else:
-            print("⚠️  Base de données source non trouvée, création d'une nouvelle base")
-            # La base sera créée automatiquement par DatabaseManager
-            
+        # Vérifier que la base contient des données
+        conn = sqlite3.connect(main_db)
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM clients')
+        count = cursor.fetchone()[0]
+        conn.close()
+        
+        print(f"✅ Base de données configurée avec {count} clients!")
+        print(f"📊 Utilisation de la base principale: {main_db}")
+        
+        # Créer un lien symbolique ou utiliser directement la base
         return True
+        
     except Exception as e:
         print(f"❌ Erreur lors de la configuration de la base: {e}")
         return False
