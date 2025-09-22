@@ -32,8 +32,26 @@ def setup_render_database():
     elif os.path.exists('data/visa_tracking.db'):
         main_db = 'data/visa_tracking.db'
     else:
-        print("❌ Aucune base de données principale trouvée!")
-        return False
+        # Aucun fichier DB direct. Essayer de restaurer depuis un backup inclus dans le repo
+        print("⚠️ Aucune base de données principale trouvée. Tentative de restauration depuis un backup...")
+        backup_candidates = []
+        # Chercher des fichiers de backup connus dans le repo
+        for fname in os.listdir('.'):
+            if fname.startswith('visa_system_backup_') and fname.endswith('.db') and os.path.isfile(fname):
+                backup_candidates.append(fname)
+        # Prendre le plus récent lexicalement (suffixe timestamp dans le nom)
+        backup_candidates.sort(reverse=True)
+        if backup_candidates:
+            newest_backup = backup_candidates[0]
+            try:
+                shutil.copyfile(newest_backup, 'visa_system.db')
+                print(f"🔁 Base restaurée depuis le backup: {newest_backup} -> visa_system.db")
+                main_db = 'visa_system.db'
+            except Exception as e:
+                print(f"❌ Échec de restauration depuis le backup {newest_backup}: {e}")
+        if not main_db:
+            print("❌ Aucune base de données principale ou backup trouvée!")
+            return False
     
     # Pour Render, utiliser directement la base principale
     target_db = main_db
