@@ -43,3 +43,4 @@ uploads/
 # Keep important databases
 !visa_system.db
 !data/visa_tracking.db
+render.yaml
