@@ -241,7 +241,7 @@ def clients_list():
 
 @app.route('/add_client')
 def add_client():
-    """Page d'ajout de client"""
+    """Page d'ajout de client - Rediriger vers le formulaire complet"""
     return redirect(url_for('add_client_form'))
 
 @app.route('/client/edit/<client_id>', methods=['GET', 'POST'])
@@ -464,6 +464,132 @@ def add_client_form():
                          nationalities=Client.NATIONALITY_OPTIONS,
                          visa_statuses=Client.VISA_STATUS_OPTIONS,
                          employees=Client.EMPLOYEE_OPTIONS)
+
+# Routes API manquantes
+@app.route('/api/update-status', methods=['POST'])
+def update_client_status():
+    """API pour mettre à jour le statut d'un client"""
+    try:
+        data = request.get_json()
+        client_id = data.get('client_id')
+        new_status = data.get('status')
+        
+        if not client_id or not new_status:
+            return jsonify({'error': 'Client ID et statut requis'}), 400
+        
+        # Mettre à jour le statut
+        success = client_controller.update_client_field(client_id, 'visa_status', new_status)
+        
+        if success:
+            return jsonify({'message': 'Statut mis à jour avec succès'}), 200
+        else:
+            return jsonify({'error': 'Échec de la mise à jour'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/client/<client_id>/update-field', methods=['POST'])
+def update_client_field_api(client_id):
+    """API pour mettre à jour un champ spécifique d'un client"""
+    try:
+        data = request.get_json()
+        field_name = data.get('field_name')
+        field_value = data.get('field_value')
+        
+        if not field_name:
+            return jsonify({'error': 'Nom du champ requis'}), 400
+        
+        # Mettre à jour le champ
+        success = client_controller.update_client_field(client_id, field_name, field_value)
+        
+        if success:
+            return jsonify({'message': f'Champ {field_name} mis à jour avec succès'}), 200
+        else:
+            return jsonify({'error': 'Échec de la mise à jour'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/client/<client_id>/send-whatsapp', methods=['POST'])
+def send_whatsapp_notification(client_id):
+    """API pour envoyer une notification WhatsApp"""
+    try:
+        data = request.get_json()
+        message_type = data.get('message_type', 'status_update')
+        
+        if not whatsapp_controller.is_whatsapp_enabled():
+            return jsonify({'error': 'WhatsApp non activé'}), 400
+        
+        # Récupérer les informations du client
+        client = client_controller.get_client_by_id(client_id)
+        if not client:
+            return jsonify({'error': 'Client non trouvé'}), 404
+        
+        # Envoyer la notification
+        success = False
+        if message_type == 'status_update':
+            success = whatsapp_controller.send_status_notification(
+                client_id, 
+                client.get('visa_status'), 
+                client.get('whatsapp_number')
+            )
+        elif message_type == 'welcome':
+            success = whatsapp_controller.send_welcome_notification(client_id)
+        else:
+            return jsonify({'error': 'Type de message non supporté'}), 400
+        
+        if success:
+            return jsonify({'message': 'Notification WhatsApp envoyée'}), 200
+        else:
+            return jsonify({'error': 'Échec de l\'envoi de la notification'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/check-passport-unique', methods=['POST'])
+def check_passport_unique():
+    """API pour vérifier l'unicité du numéro de passeport"""
+    try:
+        data = request.get_json()
+        passport_number = data.get('passport_number')
+        
+        if not passport_number:
+            return jsonify({'error': 'Numéro de passeport requis'}), 400
+        
+        is_unique = db_manager.is_passport_number_unique(passport_number)
+        
+        return jsonify({'is_unique': is_unique}), 200
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/search-instant', methods=['GET'])
+def instant_search():
+    """API pour la recherche instantanée"""
+    try:
+        query = request.args.get('q', '')
+        
+        if not query or len(query) < 2:
+            return jsonify({'results': []})
+        
+        # Rechercher les clients correspondants
+        results, _ = client_controller.search_clients(query, 1, 10)
+        
+        # Formater les résultats pour la recherche instantanée
+        formatted_results = []
+        for client in results:
+            formatted_results.append({
+                'id': client.get('client_id'),
+                'name': client.get('full_name'),
+                'passport': client.get('passport_number'),
+                'status': client.get('visa_status'),
+                'nationality': client.get('nationality')
+            })
+        
+        return jsonify({'results': formatted_results}), 200
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Configuration pour Render
