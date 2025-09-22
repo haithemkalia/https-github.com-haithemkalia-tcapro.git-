@@ -18,11 +18,31 @@ os.environ['PYTHONPATH'] = 'src'
 
 # Utiliser la base de données principale au lieu de la copier
 def setup_render_database():
-    """Préparer la base de données principale pour Render"""
+    """Configure la base de données pour Render avec la bonne priorité"""
     
-    # Priorité: visa_system.db > clients.db > data/visa_tracking.db
-    # Ajouter la base de données spécifique src/database/visa_tracking.db en priorité
+    # PRIORITÉ 1: Utiliser visa_system.db si disponible (base de données principale)
+    if os.path.exists('visa_system.db'):
+        print("✅ Utilisation de visa_system.db comme base de données principale")
+        return 'visa_system.db'
     
+    # PRIORITÉ 2: src/database/visa_tracking.db (base de données source)
+    if os.path.exists('src/database/visa_tracking.db'):
+        print("✅ Utilisation de src/database/visa_tracking.db")
+        return 'src/database/visa_tracking.db'
+    
+    # PRIORITÉ 3: data/visa_tracking.db (alternative)
+    if os.path.exists('data/visa_tracking.db'):
+        print("✅ Utilisation de data/visa_tracking.db")
+        return 'data/visa_tracking.db'
+    
+    # PRIORITÉ 4: clients.db (ancienne base)
+    if os.path.exists('clients.db'):
+        print("✅ Utilisation de clients.db")
+        return 'clients.db'
+    
+    # Créer une nouvelle base si aucune n'existe
+    print("⚠️ Aucune base de données trouvée, création d'une nouvelle base")
+    return 'visa_system.db'
     main_db = None
     
     # Première priorité: la base de données spécifique dans src/database
