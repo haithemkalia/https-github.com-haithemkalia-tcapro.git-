@@ -2,21 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "app.py",
+      "src": "vercel_app.py",
       "use": "@vercel/python",
       "config": {
-        "maxLambdaSize": "15mb"
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.9"
       }
     }
   ],
   "routes": [
     {
       "src": "/health",
-      "dest": "app.py"
+      "dest": "vercel_app.py"
     },
     {
       "src": "/(.*)",
-      "dest": "app.py"
+      "dest": "vercel_app.py"
     }
   ],
   "env": {
@@ -24,9 +25,9 @@
     "VERCEL": "true"
   },
   "functions": {
-    "app.py": {
+    "vercel_app.py": {
       "maxDuration": 30
     }
   },
-  "installCommand": "pip install -r requirements-deploy.txt"
+  "installCommand": "pip install --upgrade pip && pip install -r requirements.txt"
 }
