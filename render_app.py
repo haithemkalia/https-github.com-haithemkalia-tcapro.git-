@@ -20,12 +20,15 @@ os.environ['PYTHONPATH'] = 'src'
 def setup_render_database():
     """Préparer la base de données principale pour Render"""
     
-    # Utiliser la base de données principale qui contient tous les clients
     # Priorité: visa_system.db > clients.db > data/visa_tracking.db
+    # Ajouter la base de données spécifique src/database/visa_tracking.db en priorité
     
     main_db = None
     
-    if os.path.exists('visa_system.db'):
+    # Première priorité: la base de données spécifique dans src/database
+    if os.path.exists('src/database/visa_tracking.db'):
+        main_db = 'src/database/visa_tracking.db'
+    elif os.path.exists('visa_system.db'):
         main_db = 'visa_system.db'
     elif os.path.exists('clients.db'):
         main_db = 'clients.db'
