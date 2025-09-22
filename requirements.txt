@@ -10,7 +10,7 @@ openpyxl==3.1.2
 # HTTP Requests
 requests==2.31.0
 
-# Database
-sqlite3
+# Web Server
+gunicorn==21.2.0
 
 # Utilities

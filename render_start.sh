@@ -15,6 +15,10 @@ else
     echo "⚠️ Aucune base de données trouvée"
 fi
 
-# Démarrer l'application
-echo "🌐 Démarrage du serveur Flask..."
-python app.py
+# Installer gunicorn si nécessaire
+echo "📦 Installation de Gunicorn..."
+pip install gunicorn
+
+# Démarrer l'application avec Gunicorn
+echo "🌐 Démarrage du serveur avec Gunicorn..."
+gunicorn app:app -c gunicorn_config.py

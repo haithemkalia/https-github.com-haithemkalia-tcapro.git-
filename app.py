@@ -1136,4 +1136,6 @@ if __name__ == '__main__':
     print("📱 Interface web disponible sur: http://localhost:5000")
     print("\n⚡ Serveur en cours d'exécution...")
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Pour Render - utiliser le port défini dans l'environnement
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
