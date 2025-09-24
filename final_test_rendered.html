@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة العملاء - نظام تتبع التأشيرات</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/styles.fd3d584b206e4d6370ba.css" rel="stylesheet">
+    
+    
+</head>
+<body>
+    <div class="overlay" id="loadingOverlay"></div>
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">
+                    🛂 نظام تتبع التأشيرات
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link " href="/">
+                                <i class="fas fa-home"></i> الرئيسية
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/clients">
+                                <i class="fas fa-users"></i> إدارة العملاء
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/client/add">
+                                <i class="fas fa-user-plus"></i> إضافة عميل
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/import-excel">
+                                <i class="fas fa-file-excel"></i> استيراد Excel
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/unrestricted-import">
+                                <i class="fas fa-rocket"></i> استيراد شامل بدون قيود
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/settings">
+                                <i class="fas fa-cog"></i> الإعدادات
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://facebook.com/yourpage" target="_blank">
+                                <i class="fab fa-facebook"></i> صفحة الفيسبوك
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        
+            
+        
+
+        <div class="content-area">
+            
+<div class="container-fluid">
+ <div class="row mb-4">
+ <div class="col-12">
+  <div class="card card-modern">
+  <div class="card-header-modern">
+   <div class="row align-items-center">
+   <div class="col">
+    <h2 class="mb-0">
+    <i class="fas fa-users me-2"></i> إدارة العملاء
+    </h2>
+    <p class="mb-0 mt-2 opacity-75">عرض وإدارة جميع عملاء النظام</p>
+   </div>
+   <div class="col-auto">
+    <a href="/client/add" class="btn btn-success-custom">
+    <i class="fas fa-plus me-2"></i>إضافة عميل جديد
+    </a>
+   </div>
+   </div>
+  </div>
+  </div>
+ </div>
+ </div>
+
+ <div class="row mb-4">
+ <div class="col-12">
+  <div class="card card-modern">
+  <div class="card-body">
+   <form method="GET" action="/clients" class="row g-3">
+   <div class="col-lg-4 col-md-6">
+    <label for="search" class="form-label">
+    <i class="fas fa-search me-1"></i>البحث الفوري
+    </label>
+    <input type="text" class="form-control" id="search" name="search" 
+      value="" placeholder="البحث بالاسم أو رقم الهاتف...">
+   </div>
+   
+   <div class="col-lg-2 col-md-6">
+    <label for="status" class="form-label">حالة التأشيرة</label>
+    <select class="form-select" id="status" name="status">
+    <option value="">جميع الحالات</option>
+    
+    <option value="تم التقديم في السيستام" >
+     تم التقديم في السيستام
+    </option>
+    
+    <option value="تم التقديم إلى السفارة" >
+     تم التقديم إلى السفارة
+    </option>
+    
+    <option value="تمت الموافقة على التأشيرة" >
+     تمت الموافقة على التأشيرة
+    </option>
+    
+    <option value="التأشيرة غير موافق عليها" >
+     التأشيرة غير موافق عليها
+    </option>
+    
+    </select>
+   </div>
+   
+   <div class="col-lg-2 col-md-6">
+    <label for="nationality" class="form-label">الجنسية</label>
+    <select class="form-select" id="nationality" name="nationality">
+    <option value="">جميع الجنسيات</option>
+    
+    <option value="تونس" >
+     تونس
+    </option>
+    
+    <option value="مغرب" >
+     مغرب
+    </option>
+    
+    <option value="جزائر" >
+     جزائر
+    </option>
+    
+    </select>
+   </div>
+   
+   <div class="col-lg-2 col-md-6">
+    <label for="employee" class="form-label">الموظف المسؤول</label>
+    <select class="form-select" id="employee" name="employee">
+    <option value="">جميع الموظفين</option>
+    
+    <option value="موظف 1" >
+     موظف 1
+    </option>
+    
+    <option value="موظف 2" >
+     موظف 2
+    </option>
+    
+    </select>
+   </div>
+   
+   <div class="col-lg-2 col-md-6 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary-custom w-100">
+    <i class="fas fa-search me-1"></i>بحث
+    </button>
+   </div>
+   
+   <div class="col-lg-2 col-md-6 d-flex align-items-end">
+    <a href="/clients?per_page=all" class="btn btn-info-custom w-100">
+    <i class="fas fa-list me-1"></i>عرض الكل
+    </a>
+   </div>
+   
+   <div class="col-lg-2 col-md-6 d-flex align-items-end">
+    <button type="button" class="btn btn-success-custom w-100" onclick="exportToExcel()">
+    <i class="fas fa-file-excel me-1"></i>تصدير إكسل
+    </button>
+   </div>
+   </form>
+  </div>
+  </div>
+ </div>
+ </div>
+
+ <div class="row">
+ <div class="col-12">
+  <div class="card card-modern">
+  <div class="card-body">
+   
+   <div class="text-center py-5">
+    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+    <h4 class="text-muted">لا توجد نتائج</h4>
+    <p class="text-muted">لم يتم العثور على أي عملاء مطابقين للمعايير المحددة</p>
+   </div>
+   
+  </div>
+  </div>
+  </div>
+ </div>
+</div>
+
+<!-- Pagination -->
+
+
+<script>
+// JavaScript pour l'édition en ligne
+document.addEventListener('DOMContentLoaded', function() {
+ initializeInlineEditing();
+});
+
+function initializeInlineEditing() {
+ const containers = document.querySelectorAll('.inline-edit-container');
+ containers.forEach(container => {
+ const display = container.querySelector('.inline-edit-display');
+ const input = container.querySelector('.inline-edit-input');
+ const editIcon = container.querySelector('.edit-icon');
+ 
+ if (display && input && editIcon) {
+  display.addEventListener('click', function(e) {
+  e.stopPropagation();
+  activateInlineEdit(container);
+  });
+  
+  editIcon.addEventListener('click', function(e) {
+  e.stopPropagation();
+  activateInlineEdit(container);
+  });
+  
+  if (input.tagName === 'SELECT') {
+  input.addEventListener('change', function() {
+   saveInlineEdit(container);
+  });
+  } else if (input.tagName === 'INPUT') {
+  input.addEventListener('blur', function() {
+   saveInlineEdit(container);
+  });
+  input.addEventListener('keydown', function(e) {
+   if (e.key === 'Enter') {
+   saveInlineEdit(container);
+   } else if (e.key === 'Escape') {
+   cancelInlineEdit(container);
+   }
+  });
+  }
+ }
+ });
+}
+
+function activateInlineEdit(container) {
+ const display = container.querySelector('.inline-edit-display');
+ const input = container.querySelector('.inline-edit-input');
+ 
+ if (display && input) {
+ display.style.display = 'none';
+ input.style.display = 'block';
+ input.focus();
+ }
+}
+
+function saveInlineEdit(container) {
+ const field = container.dataset.field;
+ const clientId = container.dataset.clientId;
+ const input = container.querySelector('.inline-edit-input');
+ const value = input.value;
+ 
+ if (!value && input.tagName !== 'SELECT') {
+ cancelInlineEdit(container);
+ return;
+ }
+ 
+ // Afficher le loading
+ showInlineEditLoading(container);
+ 
+ // Envoyer la requête
+ fetch(`/api/client/${clientId}/update-field`, {
+ method: 'POST',
+ headers: {
+  'Content-Type': 'application/json',
+ },
+ body: JSON.stringify({
+  field: field,
+  value: value
+ })
+ })
+ .then(response => response.json())
+ .then(data => {
+ if (data.success) {
+  updateInlineEditDisplay(container, value);
+  showInlineEditMessage(container, 'تم الحفظ بنجاح', 'success');
+ } else {
+  showInlineEditMessage(container, 'خطأ في الحفظ: ' + data.message, 'error');
+  cancelInlineEdit(container);
+ }
+ })
+ .catch(error => {
+ showInlineEditMessage(container, 'خطأ في الاتصال: ' + error.message, 'error');
+ cancelInlineEdit(container);
+ });
+}
+
+function cancelInlineEdit(container) {
+ const display = container.querySelector('.inline-edit-display');
+ const input = container.querySelector('.inline-edit-input');
+ 
+ if (display && input) {
+ display.style.display = 'block';
+ input.style.display = 'none';
+ }
+}
+
+function updateInlineEditDisplay(container, value) {
+ const fieldValue = container.querySelector('.field-value');
+ if (fieldValue) {
+ fieldValue.textContent = value || 'غير محدد';
+ }
+}
+
+function showInlineEditLoading(container) {
+ const display = container.querySelector('.inline-edit-display');
+ if (display) {
+ display.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+ }
+}
+
+function showInlineEditMessage(container, message, type) {
+ const display = container.querySelector('.inline-edit-display');
+ if (display) {
+ const className = type === 'success' ? 'text-success' : 'text-danger';
+ display.innerHTML = `<span class="${className}">${message}</span>`;
+ 
+ setTimeout(() => {
+  const fieldValue = container.querySelector('.field-value');
+  if (fieldValue) {
+  display.innerHTML = fieldValue.outerHTML + '<i class="fas fa-edit edit-icon"></i>';
+  }
+ }, 2000);
+ }
+}
+
+// Fonction pour supprimer un client avec confirmation avancée
+function deleteClient(clientId) {
+ // Récupérer les informations du client pour la confirmation
+ const row = event.target.closest('tr');
+ const clientName = row.querySelector('td:nth-child(2)').textContent.trim();
+ const clientPhone = row.querySelector('td:nth-child(3)').textContent.trim();
+ 
+ // Message de confirmation détaillé
+ const confirmMessage = `هل أنت متأكد من حذف هذا العميل؟
+
+📋 معلومات العميل:
+• المعرف: ${clientId}
+• الاسم: ${clientName}
+• الهاتف: ${clientPhone}
+
+⚠️ تحذير: هذا الإجراء لا يمكن التراجع عنه!
+
+اكتب "حذف" للتأكيد:`;
+ 
+ // Demander confirmation avec input
+ const userInput = prompt(confirmMessage);
+ 
+ if (userInput !== 'حذف') {
+  if (userInput !== null) {
+   alert('❌ تم إلغاء الحذف - لم تكتب "حذف"');
+  }
+  return;
+ }
+ 
+ // Afficher le loading
+ const button = event.target.closest('button');
+ const originalContent = button.innerHTML;
+ button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> حذف...';
+ button.disabled = true;
+ 
+ // Créer un formulaire pour la suppression
+ const form = document.createElement('form');
+ form.method = 'POST';
+ form.action = `/client/delete/${clientId}`;
+ 
+ // Ajouter le formulaire au DOM et le soumettre
+ document.body.appendChild(form);
+ form.submit();
+}
+
+// Fonction pour envoyer un message WhatsApp de test
+function sendWhatsAppTest(clientId) {
+ if (!confirm('هل تريد إرسال رسالة واتساب تجريبية لهذا العميل؟')) {
+ return;
+ }
+ 
+ // Afficher le loading
+ const button = event.target.closest('button');
+ const originalContent = button.innerHTML;
+ button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+ button.disabled = true;
+ 
+ // Envoyer la requête
+ fetch(`/api/client/${clientId}/send-whatsapp`, {
+ method: 'POST',
+ headers: {
+  'Content-Type': 'application/json',
+ }
+ })
+ .then(response => response.json())
+ .then(data => {
+ if (data.success) {
+  alert('✅ تم إرسال رسالة الواتساب بنجاح!\n\n📱 الرقم: ' + data.phone_number + '\n📋 الحالة: ' + data.status);
+ } else {
+  alert('❌ فشل في إرسال الرسالة: ' + data.message);
+ }
+ })
+ .catch(error => {
+ alert('❌ خطأ في الاتصال: ' + error.message);
+ })
+ .finally(() => {
+ // Restaurer le bouton
+ button.innerHTML = originalContent;
+ button.disabled = false;
+ });
+}
+
+// Fonction pour exporter vers Excel
+function exportToExcel() {
+ // Récupérer les paramètres de recherche actuels
+ const searchParams = new URLSearchParams(window.location.search);
+ const search = searchParams.get('search') || '';
+ const status = searchParams.get('status') || '';
+ const nationality = searchParams.get('nationality') || '';
+ const employee = searchParams.get('employee') || '';
+ 
+ // Construire l'URL d'export avec les paramètres
+ let exportUrl = '/export/excel';
+ const params = [];
+ 
+ if (search) params.push(`search=${encodeURIComponent(search)}`);
+ if (status) params.push(`status=${encodeURIComponent(status)}`);
+ if (nationality) params.push(`nationality=${encodeURIComponent(nationality)}`);
+ if (employee) params.push(`employee=${encodeURIComponent(employee)}`);
+ 
+ if (params.length > 0) {
+  exportUrl += '?' + params.join('&');
+ }
+ 
+ // Ouvrir le lien de téléchargement dans un nouvel onglet
+ window.open(exportUrl, '_blank');
+}
+</script>
+
+        </div>
+
+        <footer class="footer-custom">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>شركة تسهيل للخدمات</h5>
+                        <p class="mb-0">نظام تتبع التأشيرات الذكي - حلول متقدمة لإدارة طلبات التأشيرات</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p class="mb-0">
+                            <i class="fas fa-phone"></i> للاستفسارات: اتصل بنا
+                        </p>
+                        <p class="mb-0">
+                            <i class="fab fa-facebook"></i>
+                            <a href="https://facebook.com/yourpage" target="_blank" class="text-white text-decoration-none">
+                                تابعونا على الفيسبوك
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                <hr class="my-3">
+                <div class="text-center">
+                    <small>&copy; 2024 شركة تسهيل للخدمات. جميع الحقوق محفوظة.</small>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/main.460c3cc42f56ecfb91fc.js"></script>
+    <script src="/static/js/dashboard.2e6f3d486f5269e9ca88.js"></script>
+    
+    
+</body>
+</html>
