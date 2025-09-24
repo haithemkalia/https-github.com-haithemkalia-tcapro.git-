@@ -4,7 +4,7 @@
 Endpoint d'export pour Flask - Ajouter à votre application
 """
 
-from flask import Flask, jsonify, send_file, render_template_string, make_response
+from flask import Flask, jsonify, send_file, render_template_string, make_response, request
 import pandas as pd
 import json
 from datetime import datetime
@@ -139,13 +139,41 @@ def create_export_routes(app, client_controller):
     def export_excel():
         """Exporter tous les clients en Excel"""
         try:
-            # Récupérer TOUS les clients
+            # Récupérer les paramètres de filtrage depuis la requête
+            search = request.args.get('search', '').strip()
+            status = request.args.get('status', '').strip()
+            nationality = request.args.get('nationality', '').strip()
+            employee = request.args.get('employee', '').strip()
+            
+            # Récupérer TOUS les clients avec les filtres
             all_clients = []
             page = 1
             per_page = 1000
             
             while True:
-                clients, total = client_controller.get_all_clients(page=page, per_page=per_page)
+                # Appliquer les filtres si nécessaire
+                if search or status or nationality or employee:
+                    # Construire le dictionnaire de filtres
+                    filters = {}
+                    if search:
+                        filters['search'] = search
+                    if status:
+                        filters['visa_status'] = status
+                    if nationality:
+                        filters['nationality'] = nationality
+                    if employee:
+                        filters['responsible_employee'] = employee
+                    
+                    # Utiliser la fonction de recherche avec filtres
+                    clients, total = client_controller.get_filtered_clients(
+                        filters=filters,
+                        page=page,
+                        per_page=per_page
+                    )
+                else:
+                    # Sinon récupérer tous les clients
+                    clients, total = client_controller.get_all_clients(page=page, per_page=per_page)
+                
                 if not clients:
                     break
                 all_clients.extend(clients)
