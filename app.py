@@ -93,7 +93,7 @@ def health_check():
         }), 500
 
 # Routes principales
-@app.route('/')
+@app.route('/', endpoint='index')
 def index():
     """Page d'accueil avec tableau de bord - Statistiques complètes et précises"""
     try:
@@ -130,7 +130,10 @@ def index():
         print(f"   Par nationalité: {stats['by_nationality']}")
         print(f"   Par employé: {stats['by_employee']}")
         
-        return render_template('index.html', stats=stats, clients=all_clients)
+        return render_template('index.html', stats=stats, clients=all_clients,
+                               app_title='نظام تتبع التأشيرات',
+                               company_name='شركة تسهيل للخدمات',
+                               facebook_link='https://facebook.com/yourpage')
         
     except Exception as e:
         flash(f'خطأ في تحميل البيانات: {str(e)}', 'error')
@@ -237,7 +240,7 @@ def test_clients():
         print(f"Erreur dans test_clients: {e}")
         return f"Erreur: {e}", 500
 
-@app.route('/clients')
+@app.route('/clients', endpoint='clients_list')
 def clients_list():
     """Page de liste des clients avec pagination et cache"""
     try:
@@ -308,13 +311,16 @@ def clients_list():
                              employee_filter=employee_filter,
                              visa_statuses=Client.VISA_STATUS_OPTIONS,
                              nationalities=Client.NATIONALITY_OPTIONS,
-                             employees=Client.EMPLOYEE_OPTIONS)
+                             employees=Client.EMPLOYEE_OPTIONS,
+                             app_title='نظام تتبع التأشيرات',
+                             company_name='شركة تسهيل للخدمات',
+                             facebook_link='https://facebook.com/yourpage')
         
     except Exception as e:
         flash(f'خطأ في تحميل قائمة العملاء: {str(e)}', 'error')
         return render_template('clients.html', clients=[], pagination={'page': 1, 'total': 0, 'total_pages': 0})
 
-@app.route('/client/add', methods=['GET', 'POST'])
+@app.route('/client/add', methods=['GET', 'POST'], endpoint='add_client')
 def add_client():
     """Ajouter un nouveau client"""
     if request.method == 'POST':
@@ -324,7 +330,7 @@ def add_client():
                 'client_id': request.form.get('client_id', '').strip(),
                 'full_name': request.form.get('full_name', '').strip(),
                 'whatsapp_number': request.form.get('whatsapp_number', '').strip(),
-                'file_date': request.form.get('application_date', '').strip(),
+                'application_date': request.form.get('application_date', '').strip(),
                 'reception_date': request.form.get('receipt_date', '').strip(),
                 'passport_number': request.form.get('passport_number', '').strip(),
                 'passport_status': request.form.get('passport_status', '').strip(),
@@ -403,7 +409,7 @@ def edit_client(client_id):
                 'client_id': request.form.get('client_id', '').strip(),
                 'full_name': request.form.get('full_name', '').strip(),
                 'whatsapp_number': request.form.get('whatsapp_number', '').strip(),
-                'file_date': request.form.get('application_date', '').strip(),
+                'application_date': request.form.get('application_date', '').strip(),
                 'reception_date': request.form.get('receipt_date', '').strip(),
                 'passport_number': request.form.get('passport_number', '').strip(),
                 'passport_status': request.form.get('passport_status', '').strip(),
@@ -807,10 +813,10 @@ def get_stats_api():
             return jsonify(cached_stats)
         
         # Calculer les statistiques si pas en cache
-        all_clients, _ = client_controller.get_all_clients(1, 10000)  # Récupérer tous les clients
+        all_clients, total_clients = client_controller.get_all_clients(1, 10000)  # Récupérer tous les clients
         
         stats = {
-            'total_clients': len(all_clients),
+            'total_clients': total_clients,  # Utiliser le total retourné par la base de données
             'by_status': {},
             'by_nationality': {},
             'by_employee': {},
@@ -1160,4 +1166,4 @@ if __name__ == '__main__':
     print("📱 Interface web disponible sur: http://localhost:5000")
     print("\n⚡ Serveur en cours d'exécution...")
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5005)
