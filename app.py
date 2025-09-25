@@ -306,17 +306,19 @@ def api_all_clients():
         clients_data = []
         for client in clients:
             client_dict = dict(client)
-            # S'assurer que toutes les dates sont au format string
+            # S'assurer que toutes les dates sont au format string et convertir les types numpy/pandas
             for key, value in client_dict.items():
                 if hasattr(value, 'strftime'):
                     client_dict[key] = value.strftime('%Y-%m-%d')
+                else:
+                    client_dict[key] = convert_to_json_serializable(value)
             clients_data.append(client_dict)
         
         return jsonify({
             'success': True,
-            'total': total,
+            'total': convert_to_json_serializable(total),
             'clients': clients_data,
-            'message': f'{total} clients récupérés avec succès'
+            'message': f'{total} clients récupés avec succès'
         })
         
     except Exception as e:
@@ -339,12 +341,14 @@ def api_complete_clients():
         for client in clients:
             client_dict = dict(client)
             
-            # S'assurer que toutes les dates sont au format string
+            # S'assurer que toutes les dates sont au format string et convertir les types numpy/pandas
             for key, value in client_dict.items():
                 if hasattr(value, 'strftime'):
                     client_dict[key] = value.strftime('%Y-%m-%d')
                 elif value is None:
                     client_dict[key] = ''
+                else:
+                    client_dict[key] = convert_to_json_serializable(value)
             
             # Ajouter des champs spécifiques pour l'API complète
             complete_client = {
@@ -463,7 +467,7 @@ def api_complete_clients():
         
         return jsonify({
             'success': True,
-            'total': total,
+            'total': convert_to_json_serializable(total),
             'clients': clients_data,
             'message': f'{total} clients récupérés avec succès avec toutes les colonnes',
             'columns': list(complete_client.keys()) if clients_data else []
