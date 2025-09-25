@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-09-25 23:47:36",
+  "statistics": {
+    "total_processed": 1001,
+    "total_imported": 1001,
+    "total_errors": 0,
+    "duplicates_accepted": 0,
+    "missing_data_filled": 2998,
+    "auto_generated_ids": 1001,
+    "validation_bypassed": 1001
+  },
+  "summary": {
+    "total_clients_processed": 1001,
+    "total_clients_imported": 1001,
+    "success_rate": "100.0%",
+    "restrictions_bypassed": 1001,
+    "duplicates_accepted": 0,
+    "auto_generated_ids": 1001
+  },
+  "status": "SUCCESS",
+  "message": "Toutes les données ont été importées sans restrictions"
+}
