@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_title }} - جميع العملاء</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 20px auto;
+            padding: 30px;
+            max-width: 98%;
+        }
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .table-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+        }
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            z-index: 10;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .status-pending { background-color: #ffc107; color: #000; }
+        .status-approved { background-color: #28a745; color: white; }
+        .status-rejected { background-color: #dc3545; color: white; }
+        .status-in-review { background-color: #17a2b8; color: white; }
+        .status-expired { background-color: #6c757d; color: white; }
+        .btn-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            color: white;
+        }
+        .search-box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 25px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #667eea;
+        }
+        .client-id {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9em;
+        }
+        .employee-badge {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.75em;
+        }
+        .table td {
+            font-size: 0.85em;
+            vertical-align: middle;
+        }
+        @media print {
+            body { background: white !important; }
+            .main-container { box-shadow: none !important; }
+            .no-print { display: none !important; }
+            .table-container { max-height: none !important; overflow: visible !important; }
+        }
+        .column-toggle {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .column-toggle label {
+            margin: 5px 10px;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <div class="header">
+                <h1><i class="bi bi-people-fill"></i> {{ app_title }}</h1>
+                <p class="mb-0">{{ company_name }}</p>
+                <h3 class="mt-3">قائمة العملاء الكاملة</h3>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-person-lines-fill"></i></h3>
+                        <h4>{{ total }}</h4>
+                        <p>عدد العملاء</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-clock-history"></i></h3>
+                        <h4 id="pending-count">0</h4>
+                        <p>قيد الانتظار</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-check-circle-fill"></i></h3>
+                        <h4 id="approved-count">0</h4>
+                        <p>تمت الموافقة</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-x-circle-fill"></i></h3>
+                        <h4 id="rejected-count">0</h4>
+                        <p>تم الرفض</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-whatsapp"></i></h3>
+                        <h4 id="whatsapp-count">0</h4>
+                        <p>مع أرقام واتساب</p>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-calendar-check"></i></h3>
+                        <h4 id="recent-count">0</h4>
+                        <p>حديثاً</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column-toggle no-print">
+                <h5><i class="bi bi-eye"></i> إظهار/إخفاء الأعمدة:</h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label><input type="checkbox" checked onchange="toggleColumn(0)"> معرف العميل</label><br>
+                        <label><input type="checkbox" checked onchange="toggleColumn(1)"> الاسم الكامل</label><br>
+                        <label><input type="checkbox" checked onchange="toggleColumn(2)"> رقم الواتساب</label><br>
+                        <label><input type="checkbox" checked onchange="toggleColumn(3)"> تاريخ التقديم</label>
+                    </div>
+                    <div class="col-md-3">
+                        <label><input type="checkbox" checked onchange="toggleColumn(4)"> تاريخ استلام للسفارة</label><br>
+                        <label><input type="checkbox" checked onchange="toggleColumn(5)"> رقم جواز السفر</label><br>
+                        <label><input type="checkbox" checked onchange="toggleColumn(6)"> حالة جواز السفر</label><br>
+                        <label><input type="checkbox" checked onchange="toggleColumn(7)"> الجنسية</label>
+                    </div>
+                    <div class="col-md-3">
+                        <label><input type="checkbox" checked onchange="toggleColumn(8)"> حالة تتبع التأشيرة</label><br>
+                        <label><input type="checkbox" checked onchange="toggleColumn(9)"> اختيار الموظف مسؤول</label><br>
+                        <label><input type="checkbox" checked onchange="toggleColumn(10)"> من طرف</label><br>
+                        <label><input type="checkbox" checked onchange="toggleColumn(11)"> الخلاصة</label>
+                    </div>
+                    <div class="col-md-3">
+                        <label><input type="checkbox" checked onchange="toggleColumn(12)"> ملاحظة</label><br>
+                        <label><input type="checkbox" checked onchange="toggleColumn(13)"> الإجراءات</label><br>
+                        <label><input type="checkbox" checked onchange="toggleColumn(14)"> تاريخ الحالة</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row no-print">
+                <div class="col-md-6">
+                    <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن عميل..." onkeyup="filterTable()">
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-custom" onclick="window.print()">
+                        <i class="bi bi-printer"></i> طباعة القائمة
+                    </button>
+                    <button class="btn btn-custom" onclick="exportToExcel()">
+                        <i class="bi bi-file-earmark-excel"></i> تصدير إلى Excel
+                    </button>
+                    <button class="btn btn-custom" onclick="showAllColumns()">
+                        <i class="bi bi-eye-fill"></i> إظهار الكل
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                {% if clients %}
+                <table class="table table-striped table-hover" id="clientsTable">
+                    <thead>
+                        <tr>
+                            <th>معرف العميل</th>
+                            <th>الاسم الكامل</th>
+                            <th>رقم الواتساب</th>
+                            <th>تاريخ التقديم</th>
+                            <th>تاريخ استلام للسفارة</th>
+                            <th>رقم جواز السفر</th>
+                            <th>حالة جواز السفر</th>
+                            <th>الجنسية</th>
+                            <th>حالة تتبع التأشيرة</th>
+                            <th>اختيار الموظف مسؤول</th>
+                            <th>من طرف</th>
+                            <th>الخلاصة</th>
+                            <th>ملاحظة</th>
+                            <th>الإجراءات</th>
+                            <th>تاريخ الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for client in clients %}
+                        <tr>
+                            <td class="client-id">{{ client.client_id }}</td>
+                            <td><strong>{{ client.full_name }}</strong></td>
+                            <td>
+                                {% if client.whatsapp_number %}
+                                    <a href="https://wa.me/{{ client.whatsapp_number_clean }}" target="_blank" class="text-success">
+                                        <i class="bi bi-whatsapp"></i> {{ client.whatsapp_number }}
+                                    </a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ client.application_date }}</td>
+                            <td>{{ client.transaction_date or '-' }}</td>
+                            <td><code>{{ client.passport_number or '-' }}</code></td>
+                            <td>
+                                <span class="status-badge status-{{ client.passport_status|lower|replace(' ', '-') }}">
+                                    {{ client.passport_status }}
+                                </span>
+                            </td>
+                            <td><span class="badge bg-secondary">{{ client.nationality }}</span></td>
+                            <td>
+                                <span class="status-badge status-{{ client.visa_status|lower|replace(' ', '-') }}">
+                                    {{ client.visa_status }}
+                                </span>
+                            </td>
+                            <td><span class="employee-badge">{{ client.responsible_employee }}</span></td>
+                            <td><small>{{ client.processed_by }}</small></td>
+                            <td><small>{{ client.summary|truncate(50) if client.summary else '-' }}</small></td>
+                            <td><small>{{ client.notes|truncate(50) if client.notes else '-' }}</small></td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="/edit-client/{{ client.id }}" class="btn btn-outline-primary btn-sm" title="تعديل">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="/client/{{ client.id }}" class="btn btn-outline-info btn-sm" title="عرض التفاصيل">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                            <td><small>{{ client.status_date or '-' }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="loading">
+                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                    <h4>لا يوجد عملاء لعرضهم</h4>
+                    <p>يرجى إضافة بعض العملاء أولاً</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="text-center mt-4 no-print">
+                <p class="text-muted">
+                    <i class="bi bi-info-circle"></i>
+                    تم استخراج {{ total }} عميل من قاعدة البيانات
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        function filterTable() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('clientsTable');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName('td');
+                let found = false;
+                
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        const txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                
+                tr[i].style.display = found ? '' : 'none';
+            }
+        }
+
+        function toggleColumn(colIndex) {
+            const table = document.getElementById('clientsTable');
+            const headers = table.getElementsByTagName('th');
+            const rows = table.getElementsByTagName('tr');
+            
+            // Toggle header
+            if (headers[colIndex]) {
+                headers[colIndex].style.display = headers[colIndex].style.display === 'none' ? '' : 'none';
+            }
+            
+            // Toggle all cells in this column
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                if (cells[colIndex]) {
+                    cells[colIndex].style.display = cells[colIndex].style.display === 'none' ? '' : 'none';
+                }
+            }
+        }
+
+        function showAllColumns() {
+            const table = document.getElementById('clientsTable');
+            const headers = table.getElementsByTagName('th');
+            const rows = table.getElementsByTagName('tr');
+            
+            // Show all headers
+            for (let i = 0; i < headers.length; i++) {
+                headers[i].style.display = '';
+            }
+            
+            // Show all cells
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                for (let j = 0; j < cells.length; j++) {
+                    cells[j].style.display = '';
+                }
+            }
+            
+            // Reset checkboxes
+            const checkboxes = document.querySelectorAll('.column-toggle input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = true);
+        }
+
+        function exportToExcel() {
+            const table = document.getElementById('clientsTable');
+            const wb = XLSX.utils.table_to_book(table, {sheet: "العملاء"});
+            XLSX.writeFile(wb, 'قائمة_العملاء_الكاملة.xlsx');
+        }
+
+        // Calculate statistics
+        function calculateStats() {
+            const rows = document.querySelectorAll('#clientsTable tbody tr');
+            let pending = 0, approved = 0, rejected = 0, whatsapp = 0;
+            
+            rows.forEach(row => {
+                const visaStatus = row.cells[8]?.textContent || '';
+                const whatsappNumber = row.cells[2]?.textContent || '';
+                
+                if (visaStatus.includes('قيد الانتظار')) pending++;
+                if (visaStatus.includes('تمت الموافقة')) approved++;
+                if (visaStatus.includes('تم الرفض')) rejected++;
+                if (whatsappNumber.trim() !== '' && whatsappNumber !== '-') whatsapp++;
+            });
+            
+            document.getElementById('pending-count').textContent = pending;
+            document.getElementById('approved-count').textContent = approved;
+            document.getElementById('rejected-count').textContent = rejected;
+            document.getElementById('whatsapp-count').textContent = whatsapp;
+            document.getElementById('recent-count').textContent = Math.min(50, rows.length);
+        }
+
+        // Calculate stats on page load
+        document.addEventListener('DOMContentLoaded', calculateStats);
+    </script>
+</body>
+</html>
