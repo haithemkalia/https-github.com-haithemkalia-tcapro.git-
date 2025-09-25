@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 20px auto;
+            padding: 30px;
+            max-width: 1400px;
+        }
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .table-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+        }
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            z-index: 10;
+        }
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .status-pending { background-color: #ffc107; color: #000; }
+        .status-approved { background-color: #28a745; color: white; }
+        .status-rejected { background-color: #dc3545; color: white; }
+        .status-in-review { background-color: #17a2b8; color: white; }
+        .status-expired { background-color: #6c757d; color: white; }
+        .btn-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            color: white;
+        }
+        .search-box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 25px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #667eea;
+        }
+        .client-id {
+            font-weight: bold;
+            color: #667eea;
+        }
+        .employee-badge {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        @media print {
+            body { background: white !important; }
+            .main-container { box-shadow: none !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <div class="header">
+                <h1><i class="bi bi-people-fill"></i> {{ app_title }}</h1>
+                <p class="mb-0">{{ company_name }}</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-person-lines-fill"></i></h3>
+                        <h4>{{ total }}</h4>
+                        <p>عدد العملاء الإجمالي</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-clock-history"></i></h3>
+                        <h4 id="pending-count">0</h4>
+                        <p>قيد الانتظار</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-check-circle-fill"></i></h3>
+                        <h4 id="approved-count">0</h4>
+                        <p>تمت الموافقة</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h3><i class="bi bi-x-circle-fill"></i></h3>
+                        <h4 id="rejected-count">0</h4>
+                        <p>تم الرفض</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row no-print">
+                <div class="col-md-6">
+                    <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن عميل..." onkeyup="filterTable()">
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-custom" onclick="window.print()">
+                        <i class="bi bi-printer"></i> طباعة القائمة
+                    </button>
+                    <button class="btn btn-custom" onclick="exportToExcel()">
+                        <i class="bi bi-file-earmark-excel"></i> تصدير إلى Excel
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                {% if clients %}
+                <table class="table table-striped table-hover" id="clientsTable">
+                    <thead>
+                        <tr>
+                            <th>رقم العميل</th>
+                            <th>الاسم الكامل</th>
+                            <th>الجنسية</th>
+                            <th>نوع التأشيرة</th>
+                            <th>حالة التأشيرة</th>
+                            <th>الموظف المسؤول</th>
+                            <th>تاريخ التقديم</th>
+                            <th>تاريخ الحالة</th>
+                            <th>ملاحظات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for client in clients %}
+                        <tr>
+                            <td class="client-id">{{ client.client_id }}</td>
+                            <td>{{ client.full_name }}</td>
+                            <td>{{ client.nationality }}</td>
+                            <td>{{ client.visa_type }}</td>
+                            <td>
+                                <span class="status-badge status-{{ client.visa_status|lower|replace(' ', '-') }}">
+                                    {{ client.visa_status }}
+                                </span>
+                            </td>
+                            <td><span class="employee-badge">{{ client.responsible_employee }}</span></td>
+                            <td>{{ client.submission_date }}</td>
+                            <td>{{ client.status_date }}</td>
+                            <td>{{ client.notes|truncate(50) if client.notes else '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="loading">
+                    <i class="bi bi-inbox display-1"></i>
+                    <h3>لا يوجد عملاء</h3>
+                    <p>لم يتم العثور على أي عملاء في النظام</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // حساب إحصائيات الحالات
+        function calculateStats() {
+            const rows = document.querySelectorAll('#clientsTable tbody tr');
+            let pending = 0, approved = 0, rejected = 0, inReview = 0;
+            
+            rows.forEach(row => {
+                const status = row.cells[4].textContent.trim();
+                switch(status) {
+                    case 'قيد الانتظار': pending++; break;
+                    case 'تمت الموافقة': approved++; break;
+                    case 'تم الرفض': rejected++; break;
+                    case 'قيد المراجعة': inReview++; break;
+                }
+            });
+            
+            document.getElementById('pending-count').textContent = pending;
+            document.getElementById('approved-count').textContent = approved;
+            document.getElementById('rejected-count').textContent = rejected;
+        }
+
+        // تصفية الجدول
+        function filterTable() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('clientsTable');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                let td = tr[i].getElementsByTagName('td');
+                let found = false;
+                
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        let txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                
+                tr[i].style.display = found ? '' : 'none';
+            }
+            
+            calculateStats();
+        }
+
+        // تصدير إلى Excel
+        function exportToExcel() {
+            const table = document.getElementById('clientsTable');
+            const workbook = XLSX.utils.table_to_book(table);
+            XLSX.writeFile(workbook, 'قائمة_العملاء_الكاملة.xlsx');
+        }
+
+        // حساب الإحصائيات عند التحميل
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateStats();
+        });
+    </script>
+</body>
+</html>
