@@ -382,7 +382,7 @@ class ClientController:
             return {'general': f"Erreur de validation: {str(e)}"}
             
     def generate_client_id(self, prefix: str = "CLI") -> str:
-        """Générer un ID client unique avec format officiel CLI001, CLI002, etc. (3 chiffres)"""
+        """Générer un ID client unique avec format officiel CLI0001, CLI0002, etc. (4 chiffres)"""
         try:
             # Requête directe à la base de données pour obtenir tous les client_id
             conn = self.db_manager.get_connection()
@@ -398,7 +398,7 @@ class ClientController:
             for client_id in all_client_ids:
                 if client_id.startswith(prefix):
                     try:
-                        # Extraire le numéro après le préfixe (format CLI001, CLI002, etc.)
+                        # Extraire le numéro après le préfixe (format CLI0001, CLI0002, etc.)
                         number_str = client_id[len(prefix):]
                         number = int(number_str)
                         existing_numbers.append(number)
@@ -409,19 +409,19 @@ class ClientController:
             if existing_numbers:
                 next_number = max(existing_numbers) + 1
             else:
-                next_number = 1  # Commencer à CLI001
+                next_number = 1  # Commencer à CLI0001
             
             # Vérifier que cet ID n'existe pas déjà (sécurité supplémentaire)
-            while f"{prefix}{next_number:03d}" in all_client_ids:
+            while f"{prefix}{next_number:04d}" in all_client_ids:
                 next_number += 1
             
-            # Format officiel: CLI + 3 chiffres (CLI001, CLI002, ..., CLI999)
-            return f"{prefix}{next_number:03d}"
+            # Format officiel: CLI + 4 chiffres (CLI0001, CLI0002, ..., CLI9999, CLI10000, etc.)
+            return f"{prefix}{next_number:04d}"
             
         except Exception as e:
             print(f"Erreur lors de la génération de l'ID: {e}")
-            # Fallback: commencer à CLI001
-            return "CLI001"
+            # Fallback: commencer à CLI0001
+            return "CLI0001"
             
     def generate_whatsapp_message(self, client_id: str) -> Dict[str, Any]:
         """Générer un message WhatsApp personnalisé pour un client"""

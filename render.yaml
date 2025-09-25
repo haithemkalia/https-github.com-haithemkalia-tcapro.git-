@@ -1,17 +1,15 @@
 services:
   - type: web
-    name: tca-visa-tracking
+    name: visa-tracking-system
     env: python
-    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt"
-    startCommand: "python render_app.py"
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.9.0
-      - key: RENDER
-        value: "true"
-      - key: PYTHONPATH
-        value: "src"
-    disk:
-      name: data
-      mountPath: /opt/render/project/data
-      sizeGB: 1
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        value: sqlite:///visa_system.db
+      - key: SECRET_KEY
+        value: votre_clé_secrète_ici
+    healthCheckPath: /
+    autoDeploy: true

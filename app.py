@@ -16,6 +16,7 @@ from pathlib import Path
 import json
 from datetime import datetime
 import pandas as pd
+import numpy as np
 import urllib.parse
 
 # Ajouter le dossier src au path Python
@@ -33,6 +34,26 @@ app = Flask(__name__)
 app.secret_key = 'tca_visa_tracking_secret_key_2024'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# Fonction helper pour convertir les types numpy/pandas en types Python natifs
+def convert_to_json_serializable(obj):
+    """Convertit les types numpy/pandas en types Python natifs pour JSON serialization"""
+    if isinstance(obj, (np.integer, np.int64, np.int32, np.int16, np.int8)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float64, np.float32)):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, pd.Timestamp):
+        return obj.isoformat()
+    elif isinstance(obj, dict):
+        return {key: convert_to_json_serializable(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_to_json_serializable(item) for item in obj]
+    elif isinstance(obj, tuple):
+        return tuple(convert_to_json_serializable(item) for item in obj)
+    else:
+        return obj
 
 # Ajouter la fonction min au contexte Jinja2
 @app.template_global()
@@ -243,6 +264,9 @@ def test_clients():
 @app.route('/clients', endpoint='clients_list')
 def clients_list():
     """Page de liste des clients avec pagination et cache"""
+    print(f"🎯 ROUTE /clients APPELÉE - DÉBUT DU TRAITEMENT")
+    print(f"🎯 URL: {request.url}")
+    print(f"🎯 ARGS: {dict(request.args)}")
     try:
         # Paramètres de pagination optimisés
         page = int(request.args.get('page', 1))
@@ -272,11 +296,14 @@ def clients_list():
             filters['responsible_employee'] = employee_filter
         
         # Récupérer les clients avec pagination (optimisé)
+        print(f"🎯 AVANT APPEL CONTRÔLEUR - page: {page}, per_page: {per_page}, filters: {filters}")
         if filters:
             clients, total = client_controller.get_filtered_clients(filters, page, per_page)
         else:
             # Permettre l'affichage de tous les clients avec pagination
             clients, total = client_controller.get_all_clients(page, per_page)
+        print(f"🎯 APRÈS APPEL CONTRÔLEUR - clients: {len(clients)}, total: {total}")
+        print(f"🎯 PREMIERS CLIENTS: {[c.get('client_id', 'N/A') for c in clients[:3]]}")
         
         # Calculer les informations de pagination
         total_pages = (total + per_page - 1) // per_page
@@ -297,10 +324,12 @@ def clients_list():
         # Les données sont déjà dans le bon format pour visa_system.db
         mapped_clients = clients
         
-        # Debug: afficher les informations
-        print(f"DEBUG: Nombre de clients récupérés: {len(clients)}")
-        print(f"DEBUG: Total: {total}")
-        print(f"DEBUG: Premiers clients: {[c.get('client_id', 'N/A') for c in clients[:3]]}")
+        # Debug: afficher les informations CRITIQUES
+        print(f"🐛 DEBUG CRITIQUE: Nombre de clients récupérés: {len(clients)}")
+        print(f"🐛 DEBUG CRITIQUE: Total: {total}")
+        print(f"🐛 DEBUG CRITIQUE: Premiers clients: {[c.get('client_id', 'N/A') for c in clients[:3]]}")
+        print(f"🐛 DEBUG CRITIQUE: Base de données: {db_manager.db_path}")
+        print(f"🐛 DEBUG CRITIQUE: Type de contrôleur: {type(client_controller)}")
         
         return render_template('clients.html', 
                              clients=mapped_clients,
@@ -794,7 +823,7 @@ def search_instant_api():
         
         return jsonify({
             'results': results,
-            'total': total,
+            'total': convert_to_json_serializable(total),
             'search_term': search_term
         })
         
@@ -816,7 +845,7 @@ def get_stats_api():
         all_clients, total_clients = client_controller.get_all_clients(1, 10000)  # Récupérer tous les clients
         
         stats = {
-            'total_clients': total_clients,  # Utiliser le total retourné par la base de données
+            'total_clients': convert_to_json_serializable(total_clients),  # Utiliser le total retourné par la base de données
             'by_status': {},
             'by_nationality': {},
             'by_employee': {},
@@ -845,13 +874,13 @@ def get_stats_api():
         
         # Remplir les statistiques avec tous les statuts possibles
         for status in Client.VISA_STATUS_OPTIONS:
-            stats['by_status'][status] = status_counts.get(status, 0)
+            stats['by_status'][status] = convert_to_json_serializable(status_counts.get(status, 0))
         
         for nationality in Client.NATIONALITY_OPTIONS:
-            stats['by_nationality'][nationality] = nationality_counts.get(nationality, 0)
+            stats['by_nationality'][nationality] = convert_to_json_serializable(nationality_counts.get(nationality, 0))
         
         for employee in Client.EMPLOYEE_OPTIONS:
-            stats['by_employee'][employee] = employee_counts.get(employee, 0)
+            stats['by_employee'][employee] = convert_to_json_serializable(employee_counts.get(employee, 0))
         
         # Mettre en cache pour 3 minutes
         cache_manager.set('dashboard_stats', stats, ttl=180)
@@ -894,7 +923,7 @@ def get_chart_data_api():
         
         # Préparer les données pour Chart.js
         chart_data['labels'] = list(filtered_counts.keys())
-        chart_data['values'] = list(filtered_counts.values())
+        chart_data['values'] = [convert_to_json_serializable(v) for v in filtered_counts.values()]
         
         # Mettre en cache pour 3 minutes
         cache_manager.set('chart_data', chart_data, ttl=180)
@@ -1163,7 +1192,7 @@ if __name__ == '__main__':
     print("🛂 نظام تتبع التأشيرات الذكي - TCA")
     print("شركة تونس للاستشارات والخدمات")
     print("\n🌐 Démarrage du serveur web...")
-    print("📱 Interface web disponible sur: http://localhost:5000")
+    print("📱 Interface web disponible sur: http://localhost:5001")
     print("\n⚡ Serveur en cours d'exécution...")
     
-    app.run(debug=True, host='0.0.0.0', port=5005)
+    app.run(debug=True, host='0.0.0.0', port=5001)

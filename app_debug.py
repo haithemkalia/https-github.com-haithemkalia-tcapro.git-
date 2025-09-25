@@ -102,7 +102,7 @@ def index():
 @app.route('/clients')
 def clients_list():
     """Page de liste des clients avec pagination"""
-        print("🔍 DEBUG: Début de clients_list()")
+    print("🔍 DEBUG: Début de clients_list()")
     try:
         # Paramètres de pagination
         page = int(request.args.get('page', 1))

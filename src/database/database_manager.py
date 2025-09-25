@@ -201,11 +201,12 @@ class DatabaseManager:
             offset = (page - 1) * per_page
             
             # Récupérer les clients paginés avec tri décroissant par client_id (plus récent en premier)
+            # Tri numérique pour que CLI1000 soit avant CLI976
             cursor.execute("""
                 SELECT * FROM clients 
                 ORDER BY 
                     CASE WHEN client_id IS NULL OR client_id = '' THEN 1 ELSE 0 END ASC,
-                    client_id DESC 
+                    CAST(SUBSTR(client_id, 4) AS INTEGER) DESC 
                 LIMIT ? OFFSET ?
             """, (per_page, offset))
             clients = cursor.fetchall()
@@ -275,6 +276,7 @@ class DatabaseManager:
             offset = (page - 1) * per_page
             
             # Récupérer les clients paginés avec tri chronologique par client_id
+            # Tri numérique pour que CLI1000 soit avant CLI976
             cursor.execute('''
                 SELECT * FROM clients 
                 WHERE full_name LIKE ? 
@@ -283,7 +285,7 @@ class DatabaseManager:
                    OR passport_number LIKE ?
                 ORDER BY 
                    CASE WHEN client_id IS NULL OR client_id = '' THEN 1 ELSE 0 END ASC,
-                   client_id ASC
+                   CAST(SUBSTR(client_id, 4) AS INTEGER) DESC
                 LIMIT ? OFFSET ?
             ''', (search_pattern, search_pattern, search_pattern, search_pattern, per_page, offset))
             
@@ -337,11 +339,12 @@ class DatabaseManager:
             offset = (page - 1) * per_page
             
             # Récupérer les clients paginés avec tri chronologique par client_id
+            # Tri numérique pour que CLI1000 soit avant CLI976
             select_query = (
                 f"SELECT * FROM clients {where_clause} "
                 "ORDER BY "
                 "CASE WHEN client_id IS NULL OR client_id = '' THEN 1 ELSE 0 END ASC, "
-                "client_id ASC "
+                "CAST(SUBSTR(client_id, 4) AS INTEGER) DESC "
                 "LIMIT ? OFFSET ?"
             )
             cursor.execute(select_query, params + [per_page, offset])
