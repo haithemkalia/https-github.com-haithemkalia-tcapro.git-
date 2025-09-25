@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قائمة العملاء الكاملة - نظام تتبع التأشيرات</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .main-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            padding: 30px;
+            max-width: 1400px;
+        }
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            border-radius: 15px;
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .search-box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 25px;
+            padding: 12px 20px;
+            width: 300px;
+            transition: all 0.3s ease;
+        }
+        .search-box:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            color: white;
+        }
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .table {
+            margin: 0;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-weight: 600;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .table tbody td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.01);
+        }
+        .client-id {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+        .client-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-pending { background-color: #ffc107; color: #000; }
+        .status-approved { background-color: #28a745; color: white; }
+        .status-rejected { background-color: #dc3545; color: white; }
+        .status-in-review { background-color: #17a2b8; color: white; }
+        .status-expired { background-color: #6c757d; color: white; }
+        .employee-badge {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .loading {
+            text-align: center;
+            padding: 100px 20px;
+            color: #667eea;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-box {
+                width: 100%;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+        @media print {
+            body { background: white !important; }
+            .main-container { box-shadow: none !important; }
+            .no-print { display: none !important; }
+            .header { background: #667eea !important; color: white !important; }
+            .stat-card { background: #667eea !important; color: white !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container fade-in">
+            <div class="header">
+                <h1><i class="bi bi-people-fill"></i> نظام تتبع التأشيرات</h1>
+                <h2>قائمة العملاء الكاملة</h2>
+                <p class="mb-0">جميع بيانات العملاء المسجلة في النظام</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-count">0</div>
+                    <div class="stat-label">إجمالي العملاء</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pending-count">0</div>
+                    <div class="stat-label">قيد الانتظار</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="approved-count">0</div>
+                    <div class="stat-label">تمت الموافقة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="rejected-count">0</div>
+                    <div class="stat-label">تم الرفض</div>
+                </div>
+            </div>
+
+            <div class="controls no-print">
+                <div>
+                    <input type="text" id="searchInput" class="search-box" placeholder="🔍 ابحث عن عميل..." onkeyup="filterTable()">
+                </div>
+                <div>
+                    <button class="btn btn-custom" onclick="window.print()">
+                        <i class="bi bi-printer"></i> طباعة
+                    </button>
+                    <button class="btn btn-custom" onclick="exportToExcel()">
+                        <i class="bi bi-file-earmark-excel"></i> تصدير Excel
+                    </button>
+                    <button class="btn btn-custom" onclick="refreshData()">
+                        <i class="bi bi-arrow-clockwise"></i> تحديث
+                    </button>
+                </div>
+            </div>
+
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <h4>جاري تحميل بيانات العملاء...</h4>
+            </div>
+
+            <div id="error" class="error" style="display: none;">
+                <i class="bi bi-exclamation-triangle-fill display-4"></i>
+                <h4>حدث خطأ في تحميل البيانات</h4>
+                <p id="error-message"></p>
+                <button class="btn btn-custom" onclick="loadClients()">إعادة المحاولة</button>
+            </div>
+
+            <div id="clients-container" style="display: none;">
+                <div class="table-container">
+                    <table class="table" id="clientsTable">
+                        <thead>
+                            <tr>
+                                <th>رقم العميل</th>
+                                <th>الاسم الكامل</th>
+                                <th>الجنسية</th>
+                                <th>نوع التأشيرة</th>
+                                <th>حالة التأشيرة</th>
+                                <th>الموظف المسؤول</th>
+                                <th>تاريخ التقديم</th>
+                                <th>تاريخ الحالة</th>
+                                <th>ملاحظات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clients-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        let allClients = [];
+        let filteredClients = [];
+
+        // تحميل بيانات العملاء
+        async function loadClients() {
+            showLoading();
+            
+            try {
+                // يمكنك تغيير هذا الرابط إلى الرابط الخاص بخادمك
+                const apiUrl = window.location.origin.includes('localhost') 
+                    ? 'http://localhost:5005/api/clients/all'
+                    : 'https://https-github-com-haithemkalia-tcapro-git.onrender.com/api/clients/all';
+                
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.success) {
+                    allClients = data.clients;
+                    filteredClients = [...allClients];
+                    displayClients();
+                    updateStats();
+                    showClients();
+                } else {
+                    showError(data.error || 'فشل في تحميل البيانات');
+                }
+            } catch (error) {
+                showError('خطأ في الاتصال بالخادم: ' + error.message);
+            }
+        }
+
+        // عرض العملاء في الجدول
+        function displayClients() {
+            const tbody = document.getElementById('clients-tbody');
+            tbody.innerHTML = '';
+            
+            filteredClients.forEach(client => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="client-id">${client.client_id || '-'}</span></td>
+                    <td><span class="client-name">${client.full_name || '-'}</span></td>
+                    <td>${client.nationality || '-'}</td>
+                    <td>${client.visa_type || '-'}</td>
+                    <td><span class="status-badge status-${getStatusClass(client.visa_status)}">${client.visa_status || '-'}</span></td>
+                    <td><span class="employee-badge">${client.responsible_employee || '-'}</span></td>
+                    <td>${formatDate(client.submission_date)}</td>
+                    <td>${formatDate(client.status_date)}</td>
+                    <td>${client.notes ? client.notes.substring(0, 50) + (client.notes.length > 50 ? '...' : '') : '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // تحديث الإحصائيات
+        function updateStats() {
+            const stats = {
+                total: allClients.length,
+                pending: allClients.filter(c => c.visa_status === 'قيد الانتظار').length,
+                approved: allClients.filter(c => c.visa_status === 'تمت الموافقة').length,
+                rejected: allClients.filter(c => c.visa_status === 'تم الرفض').length
+            };
+
+            document.getElementById('total-count').textContent = stats.total;
+            document.getElementById('pending-count').textContent = stats.pending;
+            document.getElementById('approved-count').textContent = stats.approved;
+            document.getElementById('rejected-count').textContent = stats.rejected;
+        }
+
+        // تصفية الجدول
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredClients = allClients.filter(client => {
+                return Object.values(client).some(value => 
+                    String(value || '').toLowerCase().includes(searchTerm)
+                );
+            });
+            
+            displayClients();
+            updateStats();
+        }
+
+        // تصدير إلى Excel
+        function exportToExcel() {
+            const ws = XLSX.utils.json_to_sheet(filteredClients);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'العملاء');
+            XLSX.writeFile(wb, 'قائمة_العملاء_الكاملة.xlsx');
+        }
+
+        // تحديث البيانات
+        function refreshData() {
+            loadClients();
+        }
+
+        // دوال مساعدة
+        function getStatusClass(status) {
+            if (!status) return 'pending';
+            const statusMap = {
+                'قيد الانتظار': 'pending',
+                'تمت الموافقة': 'approved',
+                'تم الرفض': 'rejected',
+                'قيد المراجعة': 'in-review',
+                'منتهية': 'expired'
+            };
+            return statusMap[status] || 'pending';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('ar-EG');
+            } catch {
+                return dateString;
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('clients-container').style.display = 'none';
+        }
+
+        function showClients() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('clients-container').style.display = 'block';
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('clients-container').style.display = 'none';
+        }
+
+        // تحميل البيانات عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', loadClients);
+    </script>
+</body>
+</html>
