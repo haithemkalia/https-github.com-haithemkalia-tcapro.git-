@@ -11,6 +11,7 @@ from datetime import datetime
 import io
 import os
 from pathlib import Path
+import numpy as np
 
 # Template HTML simple pour l'export
 EXPORT_TEMPLATE = '''
@@ -71,6 +72,21 @@ EXPORT_TEMPLATE = '''
 </html>
 '''
 
+# Ajouter un encodeur personnalisé pour les types NumPy
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, (np.int64, np.int32, np.int16, np.int8)):
+            return int(obj)
+        elif isinstance(obj, (np.float64, np.float32)):
+            return float(obj)
+        return super(NumpyEncoder, self).default(obj)
+
 def create_export_routes(app, client_controller):
     """Créer les routes d'export pour l'application Flask"""
     
@@ -122,8 +138,8 @@ def create_export_routes(app, client_controller):
                 "clients": all_clients
             }
             
-            # Créer le fichier JSON en mémoire
-            json_str = json.dumps(export_data, ensure_ascii=False, indent=2)
+            # Créer le fichier JSON en mémoire avec l'encodeur personnalisé
+            json_str = json.dumps(export_data, ensure_ascii=False, indent=2, cls=NumpyEncoder)
             
             # Créer une réponse avec le fichier JSON
             response = make_response(json_str)
