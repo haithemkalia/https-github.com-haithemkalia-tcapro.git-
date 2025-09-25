@@ -304,6 +304,15 @@ def clients_list():
             clients, total = client_controller.get_all_clients(page, per_page)
         print(f"🎯 APRÈS APPEL CONTRÔLEUR - clients: {len(clients)}, total: {total}")
         print(f"🎯 PREMIERS CLIENTS: {[c.get('client_id', 'N/A') for c in clients[:3]]}")
+        print(f"🎯 TOUS LES CLIENTS: {[c.get('client_id', 'N/A') for c in clients]}")  # DEBUG: afficher tous les clients
+        
+        # Écrire dans un fichier log pour débogage
+        with open('debug_route.log', 'w', encoding='utf-8') as f:
+            f.write(f"Page: {page}, Per page: {per_page}\n")
+            f.write(f"Total clients: {total}\n")
+            f.write(f"Clients returned: {len(clients)}\n")
+            f.write(f"Client IDs: {[c.get('client_id', 'N/A') for c in clients]}\n")
+            f.write(f"CLI1000 present: {'CLI1000' in [c.get('client_id', 'N/A') for c in clients]}\n")
         
         # Calculer les informations de pagination
         total_pages = (total + per_page - 1) // per_page
@@ -1173,6 +1182,107 @@ def get_analytics_chart_data_api(chart_type):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/export/excel')
+def export_clients_excel():
+    """Exporter la liste des clients vers Excel"""
+    try:
+        print(f"🎯 EXPORT EXCEL: Début de l'export")
+        
+        # Récupérer les paramètres de filtrage
+        search = request.args.get('search', '')
+        status = request.args.get('status', '')
+        nationality = request.args.get('nationality', '')
+        employee = request.args.get('employee', '')
+        
+        print(f"🎯 EXPORT EXCEL: Filtres - search: '{search}', status: '{status}', nationality: '{nationality}', employee: '{employee}'")
+        
+        # Obtenir tous les clients avec les filtres
+        page = 1
+        per_page = 10000  # Récupérer beaucoup de clients pour l'export
+        
+        # Construire les filtres
+        filters = {}
+        if search:
+            filters['search'] = search
+        if status:
+            filters['status'] = status
+        if nationality:
+            filters['nationality'] = nationality
+        if employee:
+            filters['employee'] = employee
+        
+        print(f"🎯 EXPORT EXCEL: Appel du contrôleur avec filtres: {filters}")
+        
+        # Récupérer les clients filtrés
+        clients_data, total_clients = client_controller.get_filtered_clients(
+            filters=filters,
+            page=page, 
+            per_page=per_page
+        )
+        
+        print(f"🎯 EXPORT EXCEL: Clients récupérés: {len(clients_data)}, Total: {total_clients}")
+        
+        if not clients_data:
+            print("🎯 EXPORT EXCEL: Aucun client à exporter")
+            return jsonify({'error': 'Aucun client à exporter'}), 404
+        
+        # Préparer les données pour l'export
+        export_data = []
+        for client in clients_data:
+            export_data.append({
+                'معرف العميل': client.get('client_id', ''),
+                'الاسم الكامل': client.get('full_name', ''),
+                'رقم الواتساب': client.get('whatsapp_number', ''),
+                'تاريخ التقديم': client.get('application_date', ''),
+                'تاريخ استلام للسفارة': client.get('transaction_date', ''),
+                'رقم جواز السفر': client.get('passport_number', ''),
+                'حالة جواز السفر': client.get('passport_status', ''),
+                'الجنسية': client.get('nationality', ''),
+                'حالة تتبع التأشيرة': client.get('visa_status', ''),
+                'من طرف': client.get('processed_by', ''),
+                'الخلاصة': client.get('summary', ''),
+                'ملاحظة': client.get('notes', ''),
+                'اختيار الموظف': client.get('responsible_employee', ''),
+                'تاريخ الإنشاء': client.get('created_at', ''),
+                'تاريخ التحديث': client.get('updated_at', '')
+            })
+        
+        print(f"🎯 EXPORT EXCEL: Données préparées pour l'export: {len(export_data)} lignes")
+        
+        # Créer le fichier Excel
+        excel_handler = ExcelHandler()
+        
+        # Générer un nom de fichier unique
+        filename = f'clients_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+        filepath = os.path.join('uploads', filename)
+        
+        # S'assurer que le dossier uploads existe
+        os.makedirs('uploads', exist_ok=True)
+        
+        print(f"🎯 EXPORT EXCEL: Export vers fichier: {filepath}")
+        
+        # Exporter vers Excel
+        success = excel_handler.export_to_excel(export_data, filepath)
+        
+        print(f"🎯 EXPORT EXCEL: Succès de l'export: {success}")
+        
+        if success and os.path.exists(filepath):
+            print(f"🎯 EXPORT EXCEL: Envoi du fichier à l'utilisateur")
+            # Envoyer le fichier à l'utilisateur
+            response = send_file(filepath, 
+                               as_attachment=True, 
+                               download_name=filename,
+                               mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            print(f"🎯 EXPORT EXCEL: Fichier envoyé avec succès")
+            return response
+        else:
+            print(f"🎯 EXPORT EXCEL: Erreur - fichier non créé")
+            return jsonify({'error': 'Erreur lors de la création du fichier Excel'}), 500
+            
+    except Exception as e:
+        print(f"🎯 EXPORT EXCEL: Exception capturée: {str(e)}")
+        return jsonify({'error': f'Erreur lors de l\'export: {str(e)}'}), 500
+
 @app.route('/api/analytics/export/<report_type>')
 def export_analysis_report_api(report_type):
     """API pour exporter un rapport d'analyse"""
@@ -1192,7 +1302,7 @@ if __name__ == '__main__':
     print("🛂 نظام تتبع التأشيرات الذكي - TCA")
     print("شركة تونس للاستشارات والخدمات")
     print("\n🌐 Démarrage du serveur web...")
-    print("📱 Interface web disponible sur: http://localhost:5000")
+    print("📱 Interface web disponible sur: http://localhost:5005")
     print("\n⚡ Serveur en cours d'exécution...")
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5005)
