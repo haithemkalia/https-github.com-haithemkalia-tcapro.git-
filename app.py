@@ -261,6 +261,228 @@ def test_clients():
         print(f"Erreur dans test_clients: {e}")
         return f"Erreur: {e}", 500
 
+@app.route('/clients/all')
+def all_clients():
+    """Affiche TOUS les clients sans pagination"""
+    try:
+        # Récupérer tous les clients sans limite
+        clients, total = client_controller.get_all_clients(1, 10000)
+        
+        return render_template('all_clients.html', 
+                             clients=clients,
+                             total=total,
+                             app_title='نظام تتبع التأشيرات - جميع العملاء',
+                             company_name='شركة تسهيل للخدمات')
+        
+    except Exception as e:
+        flash(f'خطأ في تحميل قائمة العملاء: {str(e)}', 'error')
+        return render_template('all_clients.html', clients=[], total=0)
+
+@app.route('/clients/complete')
+def complete_clients():
+    """Affiche TOUS les clients avec TOUTES les colonnes"""
+    try:
+        # Récupérer tous les clients sans limite
+        clients, total = client_controller.get_all_clients(1, 10000)
+        
+        return render_template('complete_clients.html', 
+                             clients=clients,
+                             total=total,
+                             app_title='نظام تتبع التأشيرات - جميع العملاء الكاملة',
+                             company_name='شركة تسهيل للخدمات')
+        
+    except Exception as e:
+        flash(f'خطأ في تحميل قائمة العملاء الكاملة: {str(e)}', 'error')
+        return render_template('complete_clients.html', clients=[], total=0)
+
+@app.route('/api/clients/all')
+def api_all_clients():
+    """API qui retourne TOUS les clients au format JSON"""
+    try:
+        # Récupérer tous les clients sans limite
+        clients, total = client_controller.get_all_clients(1, 10000)
+        
+        # Convertir en format JSON sérialisable
+        clients_data = []
+        for client in clients:
+            client_dict = dict(client)
+            # S'assurer que toutes les dates sont au format string
+            for key, value in client_dict.items():
+                if hasattr(value, 'strftime'):
+                    client_dict[key] = value.strftime('%Y-%m-%d')
+            clients_data.append(client_dict)
+        
+        return jsonify({
+            'success': True,
+            'total': total,
+            'clients': clients_data,
+            'message': f'{total} clients récupérés avec succès'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'clients': [],
+            'total': 0
+        }), 500
+
+@app.route('/api/clients/complete')
+def api_complete_clients():
+    """API qui retourne TOUS les clients avec TOUTES les colonnes au format JSON"""
+    try:
+        # Récupérer tous les clients sans limite
+        clients, total = client_controller.get_all_clients(1, 10000)
+        
+        # Convertir en format JSON sérialisable avec toutes les colonnes
+        clients_data = []
+        for client in clients:
+            client_dict = dict(client)
+            
+            # S'assurer que toutes les dates sont au format string
+            for key, value in client_dict.items():
+                if hasattr(value, 'strftime'):
+                    client_dict[key] = value.strftime('%Y-%m-%d')
+                elif value is None:
+                    client_dict[key] = ''
+            
+            # Ajouter des champs spécifiques pour l'API complète
+            complete_client = {
+                'معرف_العميل': client_dict.get('client_id', ''),
+                'الاسم_الكامل': client_dict.get('full_name', ''),
+                'رقم_الواتساب': client_dict.get('whatsapp_number', ''),
+                'تاريخ_التقديم': client_dict.get('application_date', ''),
+                'تاريخ_استلام_للسفارة': client_dict.get('transaction_date', ''),
+                'رقم_جواز_السفر': client_dict.get('passport_number', ''),
+                'حالة_جواز_السفر': client_dict.get('passport_status', ''),
+                'الجنسية': client_dict.get('nationality', ''),
+                'حالة_تتبع_التأشيرة': client_dict.get('visa_status', ''),
+                'اختيار_الموظف_مسؤول': client_dict.get('responsible_employee', ''),
+                'من_طرف': client_dict.get('processed_by', ''),
+                'الخلاصة': client_dict.get('summary', ''),
+                'ملاحظة': client_dict.get('notes', ''),
+                'تاريخ_الحالة': client_dict.get('status_date', ''),
+                'نوع_التأشيرة': client_dict.get('visa_type', ''),
+                'مدة_التأشيرة': client_dict.get('visa_duration', ''),
+                'السفارة': client_dict.get('embassy', ''),
+                'حالة_العميل': client_dict.get('client_status', ''),
+                'تم_الانتهاء': client_dict.get('is_completed', ''),
+                'تاريخ_الانتهاء': client_dict.get('completion_date', ''),
+                'رقم_الملف': client_dict.get('file_number', ''),
+                'مكان_الولادة': client_dict.get('birth_place', ''),
+                'تاريخ_الولادة': client_dict.get('birth_date', ''),
+                'العنوان': client_dict.get('address', ''),
+                'رقم_الهاتف': client_dict.get('phone_number', ''),
+                'البريد_الالكتروني': client_dict.get('email', ''),
+                'الرمز_البحري': client_dict.get('seaman_book', ''),
+                'تاريخ_الاصدار': client_dict.get('issue_date', ''),
+                'تاريخ_الانتهاء': client_dict.get('expiry_date', ''),
+                'المهنة': client_dict.get('profession', ''),
+                'الشركة': client_dict.get('company', ''),
+                'نوع_الجواز': client_dict.get('passport_type', ''),
+                'مكان_الاصدار': client_dict.get('issue_place', ''),
+                'الحالة_الاجتماعية': client_dict.get('marital_status', ''),
+                'عدد_المرافقين': client_dict.get('companions', ''),
+                'اسم_المرافق': client_dict.get('companion_name', ''),
+                'رقم_جواز_المرافق': client_dict.get('companion_passport', ''),
+                'ملاحظات_المرافق': client_dict.get('companion_notes', ''),
+                'المبلغ_المطلوب': client_dict.get('required_amount', ''),
+                'المبلغ_المتبقي': client_dict.get('remaining_amount', ''),
+                'حالة_الدفع': client_dict.get('payment_status', ''),
+                'طريقة_الدفع': client_dict.get('payment_method', ''),
+                'تاريخ_الدفع': client_dict.get('payment_date', ''),
+                'رقم_الايصال': client_dict.get('receipt_number', ''),
+                'العملة': client_dict.get('currency', ''),
+                'سعر_الصرف': client_dict.get('exchange_rate', ''),
+                'الاجمالي_بالدينار': client_dict.get('total_tnd', ''),
+                'الاجمالي_باليورو': client_dict.get('total_eur', ''),
+                'الاجمالي_بالدولار': client_dict.get('total_usd', ''),
+                'تاريخ_الانشاء': client_dict.get('created_at', ''),
+                'تاريخ_التعديل': client_dict.get('updated_at', ''),
+                'تم_الانشاء_تلقائيا': client_dict.get('auto_generated_id', ''),
+                'اسم_الموظف': client_dict.get('employee_name', ''),
+                'كود_الموظف': client_dict.get('employee_code', ''),
+                'قسم_الموظف': client_dict.get('employee_department', ''),
+                'رقم_مكتب_الموظف': client_dict.get('employee_office', ''),
+                'هاتف_الموظف': client_dict.get('employee_phone', ''),
+                'بريد_الموظف': client_dict.get('employee_email', ''),
+                'ملاحظات_الموظف': client_dict.get('employee_notes', ''),
+                'تاريخ_تعيين_الموظف': client_dict.get('employee_hire_date', ''),
+                'حالة_الموظف': client_dict.get('employee_status', ''),
+                'صلاحية_الموظف': client_dict.get('employee_permissions', ''),
+                'رقم_السجل_التجاري': client_dict.get('commercial_register', ''),
+                'رقم_البطاقة_الوطنية': client_dict.get('national_id', ''),
+                'رقم_الضمان_الاجتماعي': client_dict.get('social_security', ''),
+                'الدرجة_العلمية': client_dict.get('education_level', ''),
+                'الاختصاص': client_dict.get('specialization', ''),
+                'سنوات_الخبرة': client_dict.get('experience_years', ''),
+                'اللغات': client_dict.get('languages', ''),
+                'مهارات_الحاسوب': client_dict.get('computer_skills', ''),
+                'رخصة_القيادة': client_dict.get('driving_license', ''),
+                'نوع_رخصة_القيادة': client_dict.get('license_type', ''),
+                'تاريخ_اصدار_الرخصة': client_dict.get('license_issue_date', ''),
+                'تاريخ_انتهاء_الرخصة': client_dict.get('license_expiry_date', ''),
+                'مكان_اصدار_الرخصة': client_dict.get('license_issue_place', ''),
+                'رقم_السيارة': client_dict.get('car_number', ''),
+                'نوع_السيارة': client_dict.get('car_type', ''),
+                'موديل_السيارة': client_dict.get('car_model', ''),
+                'لون_السيارة': client_dict.get('car_color', ''),
+                'سنة_السيارة': client_dict.get('car_year', ''),
+                'اسم_مالك_السيارة': client_dict.get('car_owner', ''),
+                'رقم_محرك_السيارة': client_dict.get('engine_number', ''),
+                'رقم_الشاسيه': client_dict.get('chassis_number', ''),
+                'مكان_وقوف_السيارة': client_dict.get('parking_location', ''),
+                'حالة_السيارة': client_dict.get('car_status', ''),
+                'تاريخ_شراء_السيارة': client_dict.get('purchase_date', ''),
+                'سعر_شراء_السيارة': client_dict.get('purchase_price', ''),
+                'طريقة_شراء_السيارة': client_dict.get('purchase_method', ''),
+                'اسم_البائع': client_dict.get('seller_name', ''),
+                'عنوان_البائع': client_dict.get('seller_address', ''),
+                'هاتف_البائع': client_dict.get('seller_phone', ''),
+                'بريد_البائع': client_dict.get('seller_email', ''),
+                'تاريخ_البيع': client_dict.get('sale_date', ''),
+                'سعر_البيع': client_dict.get('sale_price', ''),
+                'طريقة_البيع': client_dict.get('sale_method', ''),
+                'اسم_المشتري': client_dict.get('buyer_name', ''),
+                'عنوان_المشتري': client_dict.get('buyer_address', ''),
+                'هاتف_المشتري': client_dict.get('buyer_phone', ''),
+                'بريد_المشتري': client_dict.get('buyer_email', ''),
+                'حالة_البيع': client_dict.get('sale_status', ''),
+                'ملاحظات_البيع': client_dict.get('sale_notes', ''),
+                'تاريخ_الاستيراد': client_dict.get('import_timestamp', ''),
+                'رقم_الصفحة_الاصلية': client_dict.get('original_row_number', ''),
+                'هل_يوجد_تكرار': client_dict.get('is_duplicate', ''),
+                'هل_يوجد_حقول_فارغة': client_dict.get('has_empty_fields', ''),
+                'هل_يوجد_اخطاء': client_dict.get('has_errors', ''),
+                'البيانات_الاصلية': client_dict.get('original_data', ''),
+                'تم_قبول_الاسم_الفارغ': client_dict.get('empty_name_accepted', ''),
+                'بيانات_اضافية': client_dict.get('extra_data', '')
+            }
+            
+            clients_data.append(complete_client)
+        
+        return jsonify({
+            'success': True,
+            'total': total,
+            'clients': clients_data,
+            'message': f'{total} clients récupérés avec succès avec toutes les colonnes',
+            'columns': list(complete_client.keys()) if clients_data else []
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'clients': [],
+            'total': 0,
+            'columns': []
+        }), 500
+
+@app.route('/render-clients')
+def render_clients():
+    """Page spéciale pour Render qui affiche tous les clients"""
+    return render_template('remote_clients.html')
+
 @app.route('/clients', endpoint='clients_list')
 def clients_list():
     """Page de liste des clients avec pagination et cache"""
@@ -1305,4 +1527,4 @@ if __name__ == '__main__':
     print("📱 Interface web disponible sur: http://localhost:5005")
     print("\n⚡ Serveur en cours d'exécution...")
     
-    app.run(debug=True, host='0.0.0.0', port=5005)
+    app.run(debug=True, host='0.0.0.0', port=5002)
