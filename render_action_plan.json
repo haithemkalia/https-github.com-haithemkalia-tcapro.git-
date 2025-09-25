@@ -1,0 +1,13 @@
+{
+  "situation": "render_accessible_but_empty",
+  "local_total": 1001,
+  "render_total": 0,
+  "missing_clients": 1001,
+  "cli100n_status": "present_on_local",
+  "recommended_actions": [
+    "1. Importer le fichier render_import_ready.xlsx",
+    "2. Utiliser l'interface d'import si disponible",
+    "3. Vérifier la section 'إضافة عميل' pour import en masse",
+    "4. Contacter l'administrateur si pas d'option d'import"
+  ]
+}
