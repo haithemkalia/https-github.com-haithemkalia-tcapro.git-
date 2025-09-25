@@ -8,7 +8,7 @@ Application Web Flask pour la gestion des visas
 """
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, make_response
-from export_endpoint import add_export_to_app
+# from export_endpoint import add_export_to_app  # Module supprimé lors du conflit Git
 from werkzeug.utils import secure_filename
 import os
 import sys
@@ -77,8 +77,8 @@ excel_handler = ExcelHandler()
 from src.controllers.analytics_controller import AnalyticsController
 analytics_controller = AnalyticsController(db_manager)
 
-# Ajouter les routes d'export
-add_export_to_app(app, client_controller)
+# Ajouter les routes d'export (désactivé car module supprimé)
+# add_export_to_app(app, client_controller)
 
 # Configuration pour les fichiers statiques RTL
 @app.context_processor
@@ -1192,7 +1192,7 @@ if __name__ == '__main__':
     print("🛂 نظام تتبع التأشيرات الذكي - TCA")
     print("شركة تونس للاستشارات والخدمات")
     print("\n🌐 Démarrage du serveur web...")
-    print("📱 Interface web disponible sur: http://localhost:5001")
+    print("📱 Interface web disponible sur: http://localhost:5000")
     print("\n⚡ Serveur en cours d'exécution...")
     
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=True, host='0.0.0.0', port=5000)
