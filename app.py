@@ -8,6 +8,7 @@ Application Web Flask pour la gestion des visas
 """
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, make_response
+from flask.json.provider import DefaultJSONProvider
 # from export_endpoint import add_export_to_app  # Module supprimé lors du conflit Git
 from werkzeug.utils import secure_filename
 import os
@@ -63,6 +64,14 @@ def min_func(a, b):
 # Rendre les fonctions min et max disponibles dans les templates
 app.jinja_env.globals['min'] = min
 app.jinja_env.globals['max'] = max
+
+# Configurer un fournisseur JSON global qui gère automatiquement numpy/pandas
+class NumpyJSONProvider(DefaultJSONProvider):
+    def default(self, obj):
+        return convert_to_json_serializable(obj)
+
+# Activer le fournisseur JSON global pour l'application Flask
+app.json = NumpyJSONProvider(app)
 
 # Créer le dossier uploads s'il n'existe pas
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
